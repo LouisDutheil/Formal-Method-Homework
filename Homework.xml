@@ -14,10 +14,23 @@ const int SAFE = 6;
 const int PNA = 7;
 const int CASUALTY = 8;
 
+const int WIDTH = 3; //grid width
+const int HEIGHT = 3; //grid height
 
 
-const int WIDTH = 3;
-const int HEIGHT = 3;
+/*********GLOBAL VARIABLES*************************/
+
+int grid[MAP_H][MAP_W];    // map
+
+/*********GLOBAL VARIABLES*************************/
+
+/*** CHANNELS *************************************/
+
+chan assist; // Channel used by drones to request first responders or survivors to assist
+chan callFirstResponder; //Channel used by drones to request survivors to call a first responder to help a person in need
+
+/*** CHANNELS *************************************/
+
 
 void initializeGrid() {
     // Set all cells to EMPTY initially
@@ -44,6 +57,89 @@ void initializeGrid() {
     //Place Drones
     //command to initialize the drone automata with its coordinates
 }</declaration>
+	<template>
+		<name>Civilian</name>
+		<location id="id0" x="-493" y="-68">
+			<name x="-544" y="-59">Initial</name>
+		</location>
+		<location id="id1" x="-688" y="-68">
+			<name x="-722" y="-102">InNeed</name>
+		</location>
+		<location id="id2" x="-221" y="-68">
+			<name x="-255" y="-102">Survivor</name>
+		</location>
+		<location id="id3" x="-221" y="34">
+			<name x="-246" y="0">Saved</name>
+		</location>
+		<location id="id4" x="-8" y="-68">
+			<name x="-67" y="-102">ZeroResponder</name>
+		</location>
+		<location id="id5" x="136" y="-153">
+			<name x="51" y="-187">CallingFirstResponder</name>
+			<label kind="comments" x="161" y="-161">remain here for 
+dist(surv, FR) time</label>
+		</location>
+		<location id="id6" x="-688" y="-204">
+			<name x="-705" y="-238">Dead</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="comments" x="-671" y="119">when helped and time for helping finishes</label>
+			<nail x="-688" y="110"/>
+			<nail x="-272" y="110"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id1"/>
+			<target ref="id6"/>
+			<label kind="comments" x="-722" y="-161">after Tv</label>
+		</transition>
+		<transition id="id9">
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<nail x="136" y="8"/>
+			<nail x="136" y="76"/>
+			<nail x="136" y="110"/>
+			<nail x="-221" y="110"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id2"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-136" y="-178">callFirstResponder?</label>
+			<nail x="-86" y="-157"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="comments" x="-119" y="8">After time to help</label>
+			<nail x="-8" y="34"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-153" y="-85">assist?</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-416" y="42">isExitNear()</label>
+			<nail x="-433" y="34"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-425" y="-68">!isFireNear() &amp;&amp;
+!isExitNear()</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-646" y="-110">isFireNear() &amp;&amp;
+!isExitNear()</label>
+			<nail x="-595" y="-67"/>
+		</transition>
+	</template>
 	<template>
 		<name x="5" y="5">Drone</name>
 		<parameter>int[2] patrolStartPoint</parameter>
@@ -112,51 +208,51 @@ void patrol() {
     // Update personDetected if a civilian is detected nearby
     personDetected = isCivilianNearby(droneX, droneY);
 }</declaration>
-		<location id="id0" x="-195" y="0">
+		<location id="id16" x="-195" y="0">
 			<name x="-214" y="-34">Patrol</name>
 		</location>
-		<location id="id1" x="450" y="76">
+		<location id="id17" x="450" y="76">
 			<name x="382" y="42">Instruct Zero Responder</name>
 		</location>
-		<location id="id2" x="170" y="0">
+		<location id="id18" x="170" y="0">
 			<name x="25" y="-59">Search for closest responder</name>
 		</location>
-		<location id="id3" x="442" y="-93">
+		<location id="id19" x="442" y="-93">
 			<name x="357" y="-127">Instruct First Responder</name>
 		</location>
-		<init ref="id0"/>
-		<transition id="id4">
-			<source ref="id1"/>
-			<target ref="id0"/>
+		<init ref="id16"/>
+		<transition id="id20">
+			<source ref="id17"/>
+			<target ref="id16"/>
 			<nail x="161" y="161"/>
 		</transition>
-		<transition id="id5">
-			<source ref="id3"/>
-			<target ref="id0"/>
+		<transition id="id21">
+			<source ref="id19"/>
+			<target ref="id16"/>
 			<nail x="153" y="-204"/>
 			<nail x="153" y="-204"/>
 		</transition>
-		<transition id="id6">
-			<source ref="id0"/>
-			<target ref="id2"/>
+		<transition id="id22">
+			<source ref="id16"/>
+			<target ref="id18"/>
 			<label kind="guard" x="-119" y="-25">PNADetected</label>
 		</transition>
-		<transition id="id7">
-			<source ref="id0"/>
-			<target ref="id0"/>
+		<transition id="id23">
+			<source ref="id16"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-289" y="76">!PNADetected</label>
 			<nail x="-119" y="67"/>
 			<nail x="-229" y="67"/>
 			<nail x="-255" y="67"/>
 		</transition>
-		<transition id="id8">
-			<source ref="id2"/>
-			<target ref="id1"/>
+		<transition id="id24">
+			<source ref="id18"/>
+			<target ref="id17"/>
 			<label kind="guard" x="238" y="68">distZR &lt; distFR</label>
 		</transition>
-		<transition id="id9">
-			<source ref="id2"/>
-			<target ref="id3"/>
+		<transition id="id25">
+			<source ref="id18"/>
+			<target ref="id19"/>
 			<label kind="guard" x="221" y="-93">distFR &lt; distZR</label>
 		</transition>
 	</template>
