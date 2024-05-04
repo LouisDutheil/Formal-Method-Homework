@@ -14,8 +14,19 @@ const int SAFE = 6;
 const int PNA = 7;
 const int CASUALTY = 8;
 
+
+/*********GLOBAL SYSTEM PARAMETERS *****************/
+
+
 const int WIDTH = 3; //grid width
 const int HEIGHT = 3; //grid height
+const int N_CIVILIANS = 10;  // Total number of civilians
+const int Tv = 10; //time for the civilian to die close to a fire
+const int Tfr = 10; //time to save a person
+
+
+
+/*********GLOBAL SYSTEM PARAMETERS ****************/
 
 
 /*********GLOBAL VARIABLES*************************/
@@ -31,6 +42,11 @@ chan callFirstResponder; //Channel used by drones to request survivors to call a
 
 /*** CHANNELS *************************************/
 
+/*** GLOBAL TYPES *********************************/
+
+//...
+
+/*** GLOBAL TYPES *************************************/
 
 void initializeGrid() {
     // Set all cells to EMPTY initially
@@ -59,6 +75,31 @@ void initializeGrid() {
 }</declaration>
 	<template>
 		<name>Civilian</name>
+		<declaration>clock x;
+
+
+int posx[N_CIVILIANS];       // Array of x coordinates
+int posy[N_CIVILIANS];       // Array of y coordinates
+
+/*
+*/
+void move() {
+    //todo decide a moving policy when the civilian is a survivor
+}
+
+/*
+    find the shortest path from the current civilian to the closest first
+    responder. The civilian can't step near the fire, but can go near 
+    exits.
+    This is useful when the drone instructs the civilian to call a first 
+    responder.
+*/
+int distance_to_first_responder(){
+
+    //todo
+}
+
+</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
 		</location>
