@@ -72,7 +72,32 @@ void initializeGrid() {
 
     //Place Drones
     //command to initialize the drone automata with its coordinates
-}</declaration>
+}
+
+/*
+    checks if the entity is near the fire
+*/
+bool isFireNear(int x, int y) {
+    // Check adjacent cells for fire
+    for (int dx = -1; dx &lt;= 1; dx++) {
+        for (int dy = -1; dy &lt;= 1; dy++) {
+            if (dx == 0 &amp;&amp; dy == 0) {
+                // Skip the cell where the entity is currently located
+                continue;
+            }
+            int nx = x + dx;
+            int ny = y + dy;
+            // Check bounds to ensure indices are within the grid
+            if (nx &gt;= 0 &amp;&amp; nx &lt; WIDTH &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; HEIGHT) {
+                if (grid[nx][ny] == FIRE) {
+                    return true; // Fire is near
+                }
+            }
+        }
+    }
+    return false; // No fire found nearby
+}
+</declaration>
 	<template>
 		<name>Civilian</name>
 		<declaration>clock x;
@@ -102,82 +127,88 @@ int distance_to_first_responder(){
 </declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
+			<urgent/>
 		</location>
-		<location id="id1" x="-688" y="-68">
-			<name x="-722" y="-102">InNeed</name>
+		<location id="id1" x="-807" y="-68">
+			<name x="-841" y="-102">InNeed</name>
 		</location>
-		<location id="id2" x="-221" y="-68">
-			<name x="-255" y="-102">Survivor</name>
+		<location id="id2" x="-102" y="-68">
+			<name x="-136" y="-102">Survivor</name>
 		</location>
 		<location id="id3" x="-221" y="34">
 			<name x="-246" y="0">Saved</name>
 		</location>
-		<location id="id4" x="-8" y="-68">
-			<name x="-67" y="-102">ZeroResponder</name>
+		<location id="id4" x="111" y="-68">
+			<name x="52" y="-102">ZeroResponder</name>
+			<label kind="invariant" x="-8" y="-51">x&lt;(distance from need + Tfr)</label>
 		</location>
-		<location id="id5" x="136" y="-153">
-			<name x="51" y="-187">CallingFirstResponder</name>
-			<label kind="comments" x="161" y="-161">remain here for 
+		<location id="id5" x="255" y="-153">
+			<name x="170" y="-187">CallingFirstResponder</name>
+			<label kind="comments" x="280" y="-161">remain here for 
 dist(surv, FR) time</label>
 		</location>
-		<location id="id6" x="-688" y="-204">
-			<name x="-705" y="-238">Dead</name>
+		<location id="id6" x="-807" y="-204">
+			<name x="-824" y="-238">Dead</name>
 		</location>
 		<init ref="id0"/>
 		<transition id="id7">
 			<source ref="id1"/>
 			<target ref="id3"/>
 			<label kind="comments" x="-671" y="119">when helped and time for helping finishes</label>
-			<nail x="-688" y="110"/>
+			<nail x="-807" y="110"/>
 			<nail x="-272" y="110"/>
 		</transition>
 		<transition id="id8">
 			<source ref="id1"/>
 			<target ref="id6"/>
-			<label kind="comments" x="-722" y="-161">after Tv</label>
+			<label kind="comments" x="-841" y="-161">after Tv</label>
 		</transition>
 		<transition id="id9">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<nail x="136" y="8"/>
-			<nail x="136" y="76"/>
-			<nail x="136" y="110"/>
+			<nail x="255" y="17"/>
+			<nail x="255" y="85"/>
+			<nail x="255" y="110"/>
 			<nail x="-221" y="110"/>
 		</transition>
 		<transition id="id10">
 			<source ref="id2"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="-136" y="-178">callFirstResponder?</label>
-			<nail x="-86" y="-157"/>
+			<label kind="synchronisation" x="-59" y="-178">callFirstResponder[id]?</label>
+			<label kind="assignment" x="17" y="-195">x:=0</label>
+			<nail x="33" y="-157"/>
 		</transition>
 		<transition id="id11">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="comments" x="-119" y="8">After time to help</label>
-			<nail x="-8" y="34"/>
+			<label kind="guard" x="-110" y="34">x=(distance from need + Tfr)</label>
+			<label kind="assignment" x="-8" y="51">x=0</label>
+			<label kind="comments" x="-1" y="8">After time to help</label>
+			<nail x="110" y="34"/>
 		</transition>
 		<transition id="id12">
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="synchronisation" x="-153" y="-85">assist?</label>
+			<label kind="synchronisation" x="-34" y="-85">assist?</label>
+			<label kind="assignment" x="-17" y="-68">x=0</label>
 		</transition>
 		<transition id="id13">
 			<source ref="id0"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-416" y="42">isExitNear()</label>
+			<label kind="guard" x="-518" y="42">isExitNear(posx[id], posy[id])</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id14">
 			<source ref="id0"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-425" y="-68">!isFireNear() &amp;&amp;
-!isExitNear()</label>
+			<label kind="guard" x="-450" y="-68">!isFireNear(posx[id], posy[id]) &amp;&amp;
+!isExitNear(posx[id], posy[id])</label>
 		</transition>
 		<transition id="id15">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-646" y="-110">isFireNear() &amp;&amp;
-!isExitNear()</label>
+			<label kind="guard" x="-782" y="-110">isFireNear(posx[id], posy[id]) &amp;&amp;
+!isExitNear(posx[id], posy[id])</label>
 			<nail x="-595" y="-67"/>
 		</transition>
 	</template>
