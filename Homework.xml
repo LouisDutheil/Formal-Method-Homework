@@ -86,8 +86,17 @@ bool need[N_CIVILIANS]       // True if civilian is in need
 
 /*
 */
-void move() {
+void move(int id) {
     //todo decide a moving policy when the civilian is a survivor
+    int r_x, r_y, new_x, new_y;
+    do{
+    r_x = uniform(0, 2) - 1;
+    r_y = uniform(0, 2) - 1;
+    new_x = posx[id] + r_x;
+    new_y = posy[id] + r_y;
+    }while(grid[new_x][new_y] != EMPTY &amp;&amp; isFireNear(new_x,new_y,grid,numRows,NumColumns));
+    posx[id] = new_x;
+    posy[id] = new_y;
 }
 
 /*
@@ -187,6 +196,7 @@ bool checksTv() {
 		</location>
 		<location id="id1" x="-807" y="-68">
 			<name x="-841" y="-102">InNeed</name>
+			<label kind="invariant" x="-817" y="-51">x&lt;=Tv</label>
 		</location>
 		<location id="id2" x="-102" y="-68">
 			<name x="-136" y="-102">Survivor</name>
