@@ -172,7 +172,15 @@ int getDistanceFromNeed(int x, int y) {
     // Return the minimum distance found, or INT_MAX if no civilians in need were found
     return minDistance;
 }
-</declaration>
+
+
+/*
+   checks if Tv is expired
+*/
+bool checksTv() {
+  if (x == Tv) { return true;}
+  else return false;
+}</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
 			<urgent/>
@@ -217,8 +225,9 @@ dist(surv, FR) time</label>
 		<transition id="id9">
 			<source ref="id1"/>
 			<target ref="id6"/>
+			<label kind="guard" x="-807" y="-170">checksTv()</label>
 			<label kind="assignment" x="-875" y="-136">need[id] = false</label>
-			<label kind="comments" x="-841" y="-161">after Tv</label>
+			<label kind="comments" x="-901" y="-178">after Tv</label>
 		</transition>
 		<transition id="id10">
 			<source ref="id5"/>
