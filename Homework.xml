@@ -31,6 +31,14 @@ const int Tfr = 10; //time to save a person
 /*********GLOBAL VARIABLES*************************/
 
 int grid[MAP_H][MAP_W];    // map
+typedef struct{
+   int x_responder;
+   int y_responder;
+   int x_need;
+   int y_need;
+}requests_zeroresponder;  // queue where drones put information about position of the persone in need. They also put position of the survivor to make the req be recognizable
+
+request_zeroresponder* head_zr;
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -38,6 +46,7 @@ int grid[MAP_H][MAP_W];    // map
 
 chan assist; // Channel used by drones to request first responders or survivors to assist
 chan callFirstResponder; //Channel used by drones to request survivors to call a first responder to help a person in need
+chan assist_done; // Channel used by civilian when they're saved by a zero responder
 
 /*** CHANNELS *************************************/
 
@@ -87,16 +96,22 @@ bool need[N_CIVILIANS]       // True if civilian is in need
 /*
 */
 void move(int id) {
-    //todo decide a moving policy when the civilian is a survivor
+    // decide a moving policy when the civilian is a survivor
     int r_x, r_y, new_x, new_y;
+    int temp = 0;
+    bool x; 
     do{
     r_x = uniform(0, 2) - 1;
     r_y = uniform(0, 2) - 1;
     new_x = posx[id] + r_x;
     new_y = posy[id] + r_y;
-    }while(grid[new_x][new_y] != EMPTY &amp;&amp; isFireNear(new_x,new_y,grid,numRows,NumColumns));
+    temp++;
+    x=isFireNear(new_x,new_y,grid,numRows,NumColumns);
+    }while(grid[new_x][new_y] != EMPTY &amp;&amp; x &amp;&amp; temp&lt;=4);
+    if(x) {
     posx[id] = new_x;
     posy[id] = new_y;
+    }
 }
 
 /*
@@ -227,6 +242,7 @@ dist(surv, FR) time</label>
 		<transition id="id8">
 			<source ref="id1"/>
 			<target ref="id3"/>
+			<label kind="synchronisation" x="-756" y="68">assist_done?</label>
 			<label kind="assignment" x="-765" y="85">need[id] = false</label>
 			<label kind="comments" x="-671" y="119">when helped and time for helping finishes</label>
 			<nail x="-807" y="110"/>
@@ -257,10 +273,11 @@ dist(surv, FR) time</label>
 		<transition id="id12">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-110" y="34">x=(distance from need + Tfr)</label>
-			<label kind="assignment" x="-8" y="51">x=0</label>
-			<label kind="comments" x="-1" y="8">After time to help</label>
-			<nail x="110" y="34"/>
+			<label kind="guard" x="-85" y="25">x=(distance from need + Tfr)</label>
+			<label kind="synchronisation" x="-42" y="59">assist_done!</label>
+			<label kind="assignment" x="-9" y="42">x=0</label>
+			<label kind="comments" x="-2" y="-1">After time to help</label>
+			<nail x="109" y="25"/>
 		</transition>
 		<transition id="id13">
 			<source ref="id2"/>
