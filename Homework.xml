@@ -39,7 +39,7 @@ typedef struct{
    requests_zeroresponder* succ;
 }requests_zeroresponder;  // queue where drones put information about position of the persone in need. They also put position of the survivor to make the req be recognizable
 
-request_zeroresponder* head_zr;
+request_zeroresponder* head_zr= NULL;
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -93,7 +93,7 @@ void initializeGrid() {
 int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
 bool need[N_CIVILIANS]       // True if civilian is in need
-requests_zeroresponder  r;
+int x_r, y_r;
 /*
 */
 void move(int id) {
@@ -210,13 +210,29 @@ bool checksTv() {
 /*
    survivor get request from drone in order to reach a person in need
 */
-void getRequest(int x,int y){
-    requests_zeroresponder* queue = head;
-    while(queue != null){
-        if(x != queue.x_responder || y != queue.y_responder){
-           queue = queue.succ 
-        }
+void getRequest(int x, int y) {
+  requests_zeroresponder* queue = head;
+  requests_zeroresponder* prec = NULL; // Initialize previous pointer
+
+  while (queue != NULL) {
+    if (x != queue-&gt;x_responder || y != queue-&gt;y_responder) {
+      prec = queue;
+      queue = queue-&gt;succ;
+    } else {
+      // Request found, remove it from the queue
+      // saving pos of the person in need
+      x_r = queue.x_need;
+      y_r = queue.y_need;
+      requests_zeroresponder* temp = queue; // Store node to be deleted
+      if (queue == head) {
+        head = queue-&gt;succ; // Update head if removing the first element
+      } else {
+        prec-&gt;succ = queue-&gt;succ; // Link previous node to the next one
+      }
+      free(temp); // Deallocate memory of the removed node
+      break; // Exit the loop after removing the request
     }
+  }
 }</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
