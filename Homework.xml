@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int EMPTY = 0;
+const int FIRE = 1;
+const int EXIT = 2;
+
+const int DRONE = 3;                //drones must not be placed on the grid because they're supposed to be able to hover over human entities (should not take room in the table)
+const int FIRSTRESPONDER = 4;
+
+const int SURVIVOR = 5;
+const int SAFE = 6;
+const int PNA = 7;
+const int CASUALTY = 8;
+
+
+/*********GLOBAL SYSTEM PARAMETERS *****************/
+
+
+const int GRID_W = 3; //grid width
+const int GRID_H = 3; //grid height
+const int N_CIVILIANS = 10;  // Total number of civilians
+const int Tv = 10; //time for the civilian to die close to a fire
+const int Tfr = 10; //time to save a person
+
+
+/*********GLOBAL SYSTEM PARAMETERS ****************/
+
+
+/*********GLOBAL VARIABLES*************************/
+
+int grid[GRID_H][GRID_W];    // map
+typedef struct{
+   int x_responder;
+   int y_responder;
+   int x_need;
+   int y_need;
+   requests_zeroresponder* succ;
+}requests_zeroresponder;  // queue where drones put information about position of the persone in need. They also put position of the survivor to make the req be recognizable
+
+request_zeroresponder* head_zr= NULL;
+
+/*********GLOBAL VARIABLES*************************/
+
+/*** CHANNELS *************************************/
+
+chan assist; // Channel used by drones to request first responders or survivors to assist
+chan callFirstResponder; //Channel used by drones to request survivors to call a first responder to help a person in need
+chan assist_done; // Channel used by civilian when they're saved by a zero responder
+
+/*** CHANNELS *************************************/
+
+/*** GLOBAL TYPES *********************************/
+
+//...
+
+/*** GLOBAL TYPES *************************************/
+
+void initializeGrid() {
+    // Set all cells to EMPTY initially
+    int i;
+    for (i = 0; i &lt; WIDTH; i++) {
+        for (int j = 0; j &lt; HEIGHT; j++) {
+            grid[i][j] = EMPTY;
+        }
+    }
+    // Place exits in predefined positions
+    grid[0][0] = EXIT;
+    grid[WIDTH][1] = EXIT;
+
+    //Place fire 
+    grid[1][1] = FIRE;
+
+    //Place Civilians
+    grid [1][0] = SURVIVOR;
+    //command to initialize the civilian automata with its coordinates
+
+    //Place First Responders
+    grid[0][1] = FIRSTRESPONDER;
+    //command to initialize the firstresponder automata with its coordinates
+
+    //Place Drones
+    //command to initialize the drone automata with its coordinates
+}
+
+
+</declaration>
+	<template>
+		<name>Civilian</name>
+		<declaration>clock x;
+
+
+int posx[N_CIVILIANS];       // Array of x coordinates
+int posy[N_CIVILIANS];       // Array of y coordinates
+bool need[N_CIVILIANS]       // True if civilian is in need
+int x_r, y_r;
+
+/*
+*/
+void move(int id) {
+    // decide a moving policy when the civilian is a survivor
+    int r_x, r_y, new_x, new_y;
+    int temp = 0;
+    bool x;
+ 
+    do{
+        r_x = uniform(0, 2) - 1;
+        r_y = uniform(0, 2) - 1;
+        new_x = posx[id] + r_x;
+        new_y = posy[id] + r_y;
+        temp++;
+        x=isFireNear(new_x,new_y);
+    }while(grid[new_x][new_y] != EMPTY &amp;&amp; x &amp;&amp; temp&lt;=4);
+
+    if(x) {
+        posx[id] = new_x;
+        posy[id] = new_y;
+    }
+}
+
+/*
+    find the shortest path from the current civilian to the closest first
+    responder. The civilian can't step near the fire, but can go near 
+    exits.
+    This is useful when the drone instructs the civilian to call a first 
+    responder.
+*/
+int distance_to_first_responder(){
+
+    //todo
+    return 1;
+}
+
+
+/*
+    checks if the entity is near the fire
+*/
+bool isFireNear(int x, int y) {
+    // Directions for vertical and horizontal neighbors only
+    int dx[4] = {-1, 1, 0, 0}; // Up, Down
+    int dy[4] = {0, 0, -1, 1}; // Left, Right
+
+    int i = 0;
+    for (i; i &lt; 4; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+
+        // Check if the new coordinates are within the grid bounds
+        if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_H &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_W) {
+            if (grid[nx][ny] == FIRE) {
+                return true;
+            }
+        }
+    }
+
+    return false; // No fire found nearby
+}
+
+
+
+/*
+    checks if the entity is near the exit
+*/
+bool isExitNear(int x, int y) {
+    // Directions for vertical and horizontal neighbors only
+    int dx[4] = {-1, 1, 0, 0}; // Up, Down
+    int dy[4] = {0, 0, -1, 1}; // Left, Right
+
+    int i = 0;
+    for (i; i &lt; 4; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+
+        // Check if the new coordinates are within the grid bounds
+        if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_H &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_W) {
+            if (grid[nx][ny] == EXIT) {
+                return true;
+            }
+        }
+    }
+
+    return false; // No exit found nearby
+}
+
+
+/*
+    returns the distance from a civilian in need to the given coordinates (x, y)
+    calculates the minimum Manhattan distance from all 'in need' civilians to the coordinates (x, y)
+*/
+int getDistanceFromNeed(int x, int y) {
+    int minDistance = INT_MAX; // Initialize to maximum possible int value
+
+    // Iterate over all civilians
+    int i;
+    for (i = 0; i &lt; N_CIVILIANS; i++) {
+        if (need[i]) { // Check if the civilian is in need
+            int dist = abs(posx[i] - x) + abs(posy[i] - y); // Calculate Manhattan distance
+            if (dist &lt; minDistance) {
+                minDistance = dist; // Update minimum distance if current is lower
+            }
+        }
+    }
+
+    // Return the minimum distance found, or INT_MAX if no civilians in need were found
+    return minDistance;
+}
+
+
+
+/*
+   survivor get request from drone in order to reach a person in need
+*/
+void getRequest(int x, int y) {
+  requests_zeroresponder* queue = head;
+  requests_zeroresponder* prec = NULL; // Initialize previous pointer
+
+  while (queue != NULL) {
+    if (x != queue-&gt;x_responder || y != queue-&gt;y_responder) {
+      prec = queue;
+      queue = queue-&gt;succ;
+    } else {
+      // Request found, remove it from the queue
+      // saving pos of the person in need
+      x_r = queue.x_need;
+      y_r = queue.y_need;
+      requests_zeroresponder* temp = queue; // Store node to be deleted
+      if (queue == head) {
+        head = queue-&gt;succ; // Update head if removing the first element
+      } else {
+        prec-&gt;succ = queue-&gt;succ; // Link previous node to the next one
+      }
+      free(temp); // Deallocate memory of the removed node
+      break; // Exit the loop after removing the request
+    }
+  }
+}</declaration>
+		<location id="id0" x="-493" y="-68">
+			<name x="-544" y="-59">Initial</name>
+			<urgent/>
+		</location>
+		<location id="id1" x="-926" y="-51">
+			<name x="-960" y="-85">InNeed</name>
+			<label kind="invariant" x="-936" y="-34">x&lt;=Tv</label>
+		</location>
+		<location id="id2" x="-102" y="-68">
+			<name x="-136" y="-102">Survivor</name>
+		</location>
+		<location id="id3" x="-221" y="34">
+			<name x="-246" y="0">Saved</name>
+		</location>
+		<location id="id4" x="340" y="-212">
+			<name x="281" y="-246">ZeroResponder</name>
+			<label kind="invariant" x="221" y="-195">x&lt;(distance from need + Tfr)</label>
+		</location>
+		<location id="id5" x="476" y="-314">
+			<name x="391" y="-348">CallingFirstResponder</name>
+			<label kind="comments" x="501" y="-322">remain here for 
+dist(surv, FR) time</label>
+		</location>
+		<location id="id6" x="-926" y="-229">
+			<name x="-943" y="-263">Dead</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id7">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-323" y="-178">move(id)</label>
+			<nail x="-153" y="-153"/>
+			<nail x="-433" y="-153"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-875" y="60">assist_done?</label>
+			<label kind="assignment" x="-884" y="77">need[id] = false</label>
+			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
+			<nail x="-926" y="102"/>
+			<nail x="-391" y="102"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id1"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-918" y="-187">x &gt; Tv</label>
+			<label kind="assignment" x="-918" y="-170">need[id] = false</label>
+		</transition>
+		<transition id="id10">
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<nail x="442" y="85"/>
+			<nail x="416" y="110"/>
+			<nail x="255" y="110"/>
+			<nail x="-221" y="110"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id2"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="59" y="-331">callFirstResponder[id]?</label>
+			<label kind="assignment" x="127" y="-348">x:=0</label>
+			<nail x="-17" y="-289"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="guard" x="103" y="34">x=(distance from need + Tfr)</label>
+			<label kind="synchronisation" x="146" y="68">assist_done!</label>
+			<label kind="assignment" x="180" y="51">x=0</label>
+			<label kind="comments" x="112" y="-8">After time to help</label>
+			<nail x="297" y="25"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="93" y="-127">assist?</label>
+			<label kind="assignment" x="8" y="-110">x=0, getRequest(posx[id],posy[id])</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-578" y="34">isExitNear(posx[id], posy[id])</label>
+			<nail x="-433" y="34"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-450" y="-68">!isFireNear(posx[id], posy[id]) &amp;&amp;
+!isExitNear(posx[id], posy[id])</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-841" y="-110">isFireNear(posx[id], posy[id]) &amp;&amp;
+!isExitNear(posx[id], posy[id])</label>
+			<label kind="assignment" x="-765" y="-59">need[id]=true</label>
+			<nail x="-595" y="-67"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Drone</name>
+		<parameter>int[2] patrolStartPoint</parameter>
+		<declaration>// Place local declarations here.
+patrolStep = 0;
+int droneX = 1, droneY = 1;    //need to find a way to instantiate these variables when the entities are placed on the grid
+void moveDrone() {
+    switch (patrolStep) {
+        case 0: // Move right along the top row of the square
+            if (droneX &lt; 3) {
+                droneX++;
+            } else {
+                patrolStep++;
+            }
+            break;
+        case 1: // Move down along the right column of the square
+            if (droneY &lt; 3) {
+                droneY++;
+            } else {
+                patrolStep++;
+            }
+            break;
+        case 2: // Move left along the bottom row of the square
+            if (droneX &gt; 1) {
+                droneX--;
+            } else {
+                patrolStep++;
+            }
+            break;
+        case 3: // Move up along the left column of the square
+            if (droneY &gt; 1) {
+                droneY--;
+            } else {
+                patrolStep = 0; // Reset patrolStep to repeat the sequence
+            }
+            break;
+    }
+}
+
+bool isCivilianNearby(int x, int y) {
+    // Check the eight neighboring cells around the drone position
+    for (int dx = -1; dx &lt;= 1; dx++) {
+        for (int dy = -1; dy &lt;= 1; dy++) {
+            // Skip the current cell (the drone's position)
+            if (dx == 0 &amp;&amp; dy == 0) {
+                continue;
+            }
+            int nx = x + dx;
+            int ny = y + dy;
+            // Check if the neighboring cell is within the grid bounds
+            if (nx &gt;= 0 &amp;&amp; nx &lt; WIDTH &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; HEIGHT) {
+                // Check if the neighboring cell contains a civilian
+                if (grid[nx][ny] == CIVILIAN) {
+                    return true; // Civilian detected nearby
+                }
+            }
+        }
+    }
+    return false; // No civilian detected nearby
+}
+
+void patrol() {
+    // Move the drone to the next position in the patrol sequence
+    moveDrone();
+
+    // Update personDetected if a civilian is detected nearby
+    personDetected = isCivilianNearby(droneX, droneY);
+}</declaration>
+		<location id="id17" x="-195" y="0">
+			<name x="-214" y="-34">Patrol</name>
+		</location>
+		<location id="id18" x="450" y="76">
+			<name x="382" y="42">Instruct Zero Responder</name>
+		</location>
+		<location id="id19" x="170" y="0">
+			<name x="25" y="-59">Search for closest responder</name>
+		</location>
+		<location id="id20" x="442" y="-93">
+			<name x="357" y="-127">Instruct First Responder</name>
+		</location>
+		<init ref="id17"/>
+		<transition id="id21">
+			<source ref="id18"/>
+			<target ref="id17"/>
+			<nail x="161" y="161"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id20"/>
+			<target ref="id17"/>
+			<nail x="153" y="-204"/>
+			<nail x="153" y="-204"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id17"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-119" y="-25">PNADetected</label>
+		</transition>
+		<transition id="id24">
+			<source ref="id17"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-289" y="76">!PNADetected</label>
+			<nail x="-119" y="67"/>
+			<nail x="-229" y="67"/>
+			<nail x="-255" y="67"/>
+		</transition>
+		<transition id="id25">
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="guard" x="238" y="68">distZR &lt; distFR</label>
+		</transition>
+		<transition id="id26">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="221" y="-93">distFR &lt; distZR</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+</system>
+	<queries>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>
