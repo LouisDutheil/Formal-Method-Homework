@@ -60,14 +60,15 @@ chan assist_done; // Channel used by civilian when they're saved by a zero respo
 void initializeGrid() {
     // Set all cells to EMPTY initially
     int i;
-    for (i = 0; i &lt; WIDTH; i++) {
-        for (int j = 0; j &lt; HEIGHT; j++) {
+    for (i = 0; i &lt; GRID_W; i++) {
+        int j;
+        for (j = 0; j &lt; GRID_H; j++) {
             grid[i][j] = EMPTY;
         }
     }
     // Place exits in predefined positions
     grid[0][0] = EXIT;
-    grid[WIDTH][1] = EXIT;
+    grid[GRID_W][1] = EXIT;
 
     //Place fire 
     grid[1][1] = FIRE;
@@ -95,6 +96,7 @@ int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
 bool need[N_CIVILIANS]       // True if civilian is in need
 int x_r, y_r;
+int victimx, victimy;
 
 /*
 */
@@ -251,7 +253,7 @@ void getRequest(int x, int y) {
 		</location>
 		<location id="id4" x="340" y="-212">
 			<name x="281" y="-246">ZeroResponder</name>
-			<label kind="invariant" x="221" y="-195">x&lt;(distance from need + Tfr)</label>
+			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromNeed(posx[id], posy[id])+ Tfr)</label>
 		</location>
 		<location id="id5" x="476" y="-314">
 			<name x="391" y="-348">CallingFirstResponder</name>
@@ -287,10 +289,10 @@ dist(surv, FR) time</label>
 		<transition id="id10">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<nail x="442" y="85"/>
-			<nail x="416" y="110"/>
-			<nail x="255" y="110"/>
-			<nail x="-221" y="110"/>
+			<nail x="450" y="85"/>
+			<nail x="424" y="110"/>
+			<nail x="263" y="110"/>
+			<nail x="-213" y="110"/>
 		</transition>
 		<transition id="id11">
 			<source ref="id2"/>
@@ -302,7 +304,7 @@ dist(surv, FR) time</label>
 		<transition id="id12">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="guard" x="103" y="34">x=(distance from need + Tfr)</label>
+			<label kind="guard" x="-25" y="34">x=(getDistanceFromNeed(posx[id], posy[id])+ Tfr)</label>
 			<label kind="synchronisation" x="146" y="68">assist_done!</label>
 			<label kind="assignment" x="180" y="51">x=0</label>
 			<label kind="comments" x="112" y="-8">After time to help</label>
