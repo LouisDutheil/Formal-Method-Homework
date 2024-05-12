@@ -31,15 +31,10 @@ const int Tfr = 10; //time to save a person
 /*********GLOBAL VARIABLES*************************/
 
 int grid[GRID_H][GRID_W];    // map
-typedef struct{
-   int x_responder;
-   int y_responder;
-   int x_need;
-   int y_need;
-   requests_zeroresponder* succ;
-}requests_zeroresponder;  // queue where drones put information about position of the persone in need. They also put position of the survivor to make the req be recognizable
 
-request_zeroresponder* head_zr= NULL;
+int xNeed[GRID_H][GRID_W];   // X coordinate for need requests, xNeed[1][2] set to 5 indicates that the civilian found at coordinates (y=1,x=2) is in charge of saving the person in need found at x = 5  
+int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = value
+
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -94,9 +89,9 @@ void initializeGrid() {
 
 int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
-bool need[N_CIVILIANS]       // True if civilian is in need
+
+int myx, myy; //coordinates of the current civilian
 int x_r, y_r;
-int victimx, victimy;
 
 /*
 */
@@ -187,55 +182,20 @@ bool isExitNear(int x, int y) {
 
 
 /*
-    returns the distance from a civilian in need to the given coordinates (x, y)
-    calculates the minimum Manhattan distance from all 'in need' civilians to the coordinates (x, y)
+    returns the distance from the assigned in need person
 */
-int getDistanceFromNeed(int x, int y) {
-    int minDistance = INT_MAX; // Initialize to maximum possible int value
+int getDistanceFromAssignedNeed() {
+    int victimx = xNeed[myy][myx], victimy = yNeed[myy][myx];
 
-    // Iterate over all civilians
-    int i;
-    for (i = 0; i &lt; N_CIVILIANS; i++) {
-        if (need[i]) { // Check if the civilian is in need
-            int dist = abs(posx[i] - x) + abs(posy[i] - y); // Calculate Manhattan distance
-            if (dist &lt; minDistance) {
-                minDistance = dist; // Update minimum distance if current is lower
-            }
-        }
-    }
-
-    // Return the minimum distance found, or INT_MAX if no civilians in need were found
-    return minDistance;
+    return abs(victimx - myx) + abs(victimy - myy); // Calculate Manhattan distance
 }
 
-
-
 /*
-   survivor get request from drone in order to reach a person in need
+    returns an array containing the path to go to position x,y in the grid[GRID_H][GRID_W]
+    by avoiding to step on cells that are fire or are near the fire.
 */
-void getRequest(int x, int y) {
-  requests_zeroresponder* queue = head;
-  requests_zeroresponder* prec = NULL; // Initialize previous pointer
+int* getPath(int x, int y){
 
-  while (queue != NULL) {
-    if (x != queue-&gt;x_responder || y != queue-&gt;y_responder) {
-      prec = queue;
-      queue = queue-&gt;succ;
-    } else {
-      // Request found, remove it from the queue
-      // saving pos of the person in need
-      x_r = queue.x_need;
-      y_r = queue.y_need;
-      requests_zeroresponder* temp = queue; // Store node to be deleted
-      if (queue == head) {
-        head = queue-&gt;succ; // Update head if removing the first element
-      } else {
-        prec-&gt;succ = queue-&gt;succ; // Link previous node to the next one
-      }
-      free(temp); // Deallocate memory of the removed node
-      break; // Exit the loop after removing the request
-    }
-  }
 }</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
@@ -253,7 +213,7 @@ void getRequest(int x, int y) {
 		</location>
 		<location id="id4" x="340" y="-212">
 			<name x="281" y="-246">ZeroResponder</name>
-			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromNeed(posx[id], posy[id])+ Tfr)</label>
+			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromAssignedNeed() + Tfr)</label>
 		</location>
 		<location id="id5" x="476" y="-314">
 			<name x="391" y="-348">CallingFirstResponder</name>
@@ -304,17 +264,16 @@ dist(surv, FR) time</label>
 		<transition id="id12">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-25" y="34">x=(getDistanceFromNeed(posx[id], posy[id])+ Tfr)</label>
+			<label kind="guard" x="-25" y="34">x=(getDistanceFromAssignedNeed() + Tfr)</label>
 			<label kind="synchronisation" x="146" y="68">assist_done!</label>
 			<label kind="assignment" x="180" y="51">x=0</label>
-			<label kind="comments" x="112" y="-8">After time to help</label>
 			<nail x="297" y="25"/>
 		</transition>
 		<transition id="id13">
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="synchronisation" x="93" y="-127">assist?</label>
-			<label kind="assignment" x="8" y="-110">x=0, getRequest(posx[id],posy[id])</label>
+			<label kind="synchronisation" x="93" y="-136">assist?</label>
+			<label kind="assignment" x="110" y="-119">x=0</label>
 		</transition>
 		<transition id="id14">
 			<source ref="id0"/>
