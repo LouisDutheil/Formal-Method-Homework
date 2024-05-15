@@ -42,7 +42,7 @@ int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = 
 
 chan assist; // Channel used by drones to request first responders or survivors to assist
 chan callFirstResponder; //Channel used by drones to request survivors to call a first responder to help a person in need
-chan assist_done; // Channel used by civilian when they're saved by a zero responder
+chan assistDone; // Channel used by civilian when they're saved by a zero responder
 
 /*** CHANNELS *************************************/
 
@@ -84,74 +84,211 @@ void initializeGrid() {
 </declaration>
 	<template>
 		<name>Civilian</name>
-		<declaration>clock x;
+		<declaration>
+
+clock x;
 
 
 int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
+bool need[N_CIVILIANS];       // set to true when civilian is in need
 
 int myx, myy; //coordinates of the current civilian
-int x_r, y_r;
 
-/*
-*/
+/**
+ * @brief Checks if a position is valid within the grid bounds.
+ *
+ * @param x The x-coordinate to check.
+ * @param y The y-coordinate to check.
+ * @return true if the position is valid, false otherwise.
+ */
+bool isValid(int x, int y) {
+    return x &gt;= 0 &amp;&amp; x &lt; GRID_W &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; GRID_H;
+}
+
+/**
+ * @brief Checks if a position is near fire.
+ *
+ * @param x The x-coordinate to check.
+ * @param y The y-coordinate to check.
+ * @return true if the position is near fire, false otherwise.
+ */
+bool isFireNear(int x, int y) {
+    const int DX[4] = {-1, 1, 0, 0}; // Up, Down
+    const int DY[4] = {0, 0, -1, 1}; // Left, Right
+    int i;
+
+    for (i = 0; i &lt; 4; i++) {
+        int nx = x + DX[i];
+        int ny = y + DY[i];
+
+        if (isValid(nx, ny) &amp;&amp; grid[nx][ny] == FIRE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+/**
+ * @brief Moves a civilian to the nearest side of the grid if the next cell is not near the fire.
+ *
+ * This function attempts to move a civilian (identified by `id`) towards the nearest edge of the grid.
+ * The movement is restricted to horizontal or vertical directions and ensures that the new position is
+ * not near fire. The function checks each step to determine if the new position is valid.
+ *
+ * @param id The identifier of the civilian to be moved.
+ */
 void move(int id) {
-    // decide a moving policy when the civilian is a survivor
-    int r_x, r_y, new_x, new_y;
-    int temp = 0;
-    bool x;
- 
-    do{
-        r_x = uniform(0, 2) - 1;
-        r_y = uniform(0, 2) - 1;
-        new_x = posx[id] + r_x;
-        new_y = posy[id] + r_y;
-        temp++;
-        x=isFireNear(new_x,new_y);
-    }while(grid[new_x][new_y] != EMPTY &amp;&amp; x &amp;&amp; temp&lt;=4);
+    // Current position of the civilian
+    int current_x = posx[id];
+    int current_y = posy[id];
+    int new_x;
+    int new_y;
 
-    if(x) {
-        posx[id] = new_x;
-        posy[id] = new_y;
+    // Determine the distances to each side of the grid
+    int dist_top = current_y;
+    int dist_bottom = GRID_H - 1 - current_y;
+    int dist_left = current_x;
+    int dist_right = GRID_W - 1 - current_x;
+
+    // Determine the nearest side of the grid without using the min function
+    int min_dist = dist_top;
+    int direction = 0; // 0 for top, 1 for bottom, 2 for left, 3 for right
+
+    if (dist_bottom &lt; min_dist) {
+        min_dist = dist_bottom;
+        direction = 1;
+    }
+    if (dist_left &lt; min_dist) {
+        min_dist = dist_left;
+        direction = 2;
+    }
+    if (dist_right &lt; min_dist) {
+        min_dist = dist_right;
+        direction = 3;
+    }
+
+    new_x = current_x;
+    new_y = current_y;
+
+    // Move in the direction of the nearest side
+    if (direction == 0) {
+        // Move up
+        new_y = current_y - 1;
+    } else if (direction == 1) {
+        // Move down
+        new_y = current_y + 1;
+    } else if (direction == 2) {
+        // Move left
+        new_x = current_x - 1;
+    } else if (direction == 3) {
+        // Move right
+        new_x = current_x + 1;
+    }
+
+    // Check if the new position is valid and not near fire
+    if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H) {
+        if (grid[new_x][new_y] == EMPTY &amp;&amp; !isFireNear(new_x, new_y)) {
+            posx[id] = new_x;
+            posy[id] = new_y;
+        }
     }
 }
 
-/*
-    find the shortest path from the current civilian to the closest first
-    responder. The civilian can't step near the fire, but can go near 
-    exits.
-    This is useful when the drone instructs the civilian to call a first 
-    responder.
-*/
-int distance_to_first_responder(){
 
-    //todo
-    return 1;
-}
+/**
+ * @brief Moves a civilian one step towards the specified destination avoiding cells near fire.
+ *
+ * This function calculates the next step from the civilian's current position
+ * towards the specified destination (destx, desty) while avoiding cells near fire.
+ * It updates the civilian's position accordingly.
+ *
+ * @param id The identifier of the civilian to be moved.
+ * @param destx The x-coordinate of the destination.
+ * @param desty The y-coordinate of the destination.
+ */
+void moveTo(int id, int destx, int desty) {
+    // Current position of the civilian
+    int current_x = posx[id];
+    int current_y = posy[id];
 
-
-/*
-    checks if the entity is near the fire
-*/
-bool isFireNear(int x, int y) {
     // Directions for vertical and horizontal neighbors only
-    int dx[4] = {-1, 1, 0, 0}; // Up, Down
-    int dy[4] = {0, 0, -1, 1}; // Left, Right
+    const int DX[4] = {-1, 1, 0, 0}; // Up, Down
+    const int DY[4] = {0, 0, -1, 1}; // Left, Right
 
-    int i = 0;
-    for (i; i &lt; 4; i++) {
-        int nx = x + dx[i];
-        int ny = y + dy[i];
+    bool path_found;
 
-        // Check if the new coordinates are within the grid bounds
-        if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_H &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_W) {
-            if (grid[nx][ny] == FIRE) {
-                return true;
+    // Queue for BFS (simulated using arrays)
+    int qx[GRID_W * GRID_H];
+    int qy[GRID_W * GRID_H];
+    int front = 0;
+    int rear = 0;
+
+    // Arrays to store previous positions for path reconstruction
+    int prev_x[GRID_W][GRID_H];
+    int prev_y[GRID_W][GRID_H];
+    bool visited[GRID_W][GRID_H] = {false};
+
+    // Check if the current position is already the destination
+    if (current_x == destx &amp;&amp; current_y == desty) {
+        return;
+    }
+
+    // Initialize BFS
+    qx[rear] = current_x;
+    qy[rear] = current_y;
+    rear++;
+    visited[current_x][current_y] = true;
+    prev_x[current_x][current_y] = -1;
+    prev_y[current_x][current_y] = -1;
+
+    path_found = false;
+
+    // BFS loop
+    while (front &lt; rear &amp;&amp; !path_found) {
+        int curr_x = qx[front];
+        int curr_y = qy[front];
+        int i;
+        front++;
+
+        for (i = 0; i &lt; 4; i++) {
+            int new_x = curr_x + DX[i];
+            int new_y = curr_y + DY[i];
+
+            if (isValid(new_x, new_y) &amp;&amp; !visited[new_x][new_y] &amp;&amp; grid[new_x][new_y] == EMPTY &amp;&amp; !isFireNear(new_x, new_y)) {
+                qx[rear] = new_x;
+                qy[rear] = new_y;
+                rear++;
+                visited[new_x][new_y] = true;
+                prev_x[new_x][new_y] = curr_x;
+                prev_y[new_x][new_y] = curr_y;
+
+                if (new_x == destx &amp;&amp; new_y == desty) {
+                    path_found = true;
+                    break;
+                }
             }
         }
     }
 
-    return false; // No fire found nearby
+    // If a path was found, trace back from the destination to the start
+    if (path_found) {
+        int x = destx;
+        int y = desty;
+
+        // Trace back to the first step from the start
+        while (prev_x[x][y] != current_x || prev_y[x][y] != current_y) {
+            int temp_x = prev_x[x][y];
+            int temp_y = prev_y[x][y];
+            x = temp_x;
+            y = temp_y;
+        }
+
+        // Move the civilian to the first step towards the destination
+        posx[id] = x;
+        posy[id] = y;
+    }
 }
 
 
@@ -179,24 +316,7 @@ bool isExitNear(int x, int y) {
 
     return false; // No exit found nearby
 }
-
-
-/*
-    returns the distance from the assigned in need person
-*/
-int getDistanceFromAssignedNeed() {
-    int victimx = xNeed[myy][myx], victimy = yNeed[myy][myx];
-
-    return abs(victimx - myx) + abs(victimy - myy); // Calculate Manhattan distance
-}
-
-/*
-    returns an array containing the path to go to position x,y in the grid[GRID_H][GRID_W]
-    by avoiding to step on cells that are fire or are near the fire.
-*/
-int* getPath(int x, int y){
-
-}</declaration>
+</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
 			<urgent/>
@@ -234,7 +354,7 @@ dist(surv, FR) time</label>
 		<transition id="id8">
 			<source ref="id1"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-875" y="60">assist_done?</label>
+			<label kind="synchronisation" x="-875" y="60">assistDone?</label>
 			<label kind="assignment" x="-884" y="77">need[id] = false</label>
 			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
 			<nail x="-926" y="102"/>
