@@ -42,7 +42,7 @@ int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = 
 
 chan assist; // Channel used by drones to request first responders or survivors to assist
 chan callFirstResponder; //Channel used by drones to request survivors to call a first responder to help a person in need
-chan assistDone; // Channel used by civilian when they're saved by a zero responder
+chan assist_done; // Channel used by civilian when they're saved by a zero responder
 
 /*** CHANNELS *************************************/
 
@@ -84,7 +84,7 @@ void initializeGrid() {
 </declaration>
 	<template>
 		<name>Civilian</name>
-		<parameter>const int[0,N] id</parameter>
+		<parameter>const int[0,N] id, const int[0,10] Tzr, const int[0,10] Tfr</parameter>
 		<declaration>
 
 clock x;
@@ -95,6 +95,8 @@ int posy[N_CIVILIANS];       // Array of y coordinates
 bool need[N_CIVILIANS];       // set to true when civilian is in need
 
 int myx, myy; //coordinates of the current civilian
+int x_need, y_need;  // coordinates of the persone in Need assigned 
+int fr_x_coord, fr_y_coord;
 
 /**
  * @brief Checks if a position is valid within the grid bounds.
@@ -321,18 +323,18 @@ bool isExitNear(int x, int y) {
 
 
 /**
- * @brief Takes distance between ZeroResponder and Civilian in Need assigned to it 
+ * @brief Sets parameters myx and myy to the values read from xNeed,yNeed 
  *
- * This function uses global variables xNeed and yNeed to retreive the position
- * of the Civilian in Need assigned to this specific ZeroResponder 
- * and calculate the distance by usinge the function moveTo
+ * This function gets coordinates from grids xNeed,yNeed in order to set 
+ * variables myx, myy for the civilian in Need
+ * 
  *
- * @param id The identifier of the civilian to be moved.
- * @param destx The x-coordinate of the destination.
- * @param desty The y-coordinate of the destination.
+ * @param x_id The x-coordinate of the person in Need.
+ * @param y_id The y-coordinate of the person in Need
  */
-int getDistanceFromAssignedNeed(){
-    
+void setting_Coordinates_Need(int x_id, int y_id){
+    x_need = xNeed[x_id][y_id];
+    y_need = yNeed[y_id][y_id];
 }</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
@@ -348,83 +350,138 @@ int getDistanceFromAssignedNeed(){
 		<location id="id3" x="-221" y="34">
 			<name x="-246" y="0">Saved</name>
 		</location>
-		<location id="id4" x="340" y="-212">
-			<name x="281" y="-246">ZeroResponder</name>
-			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromAssignedNeed() + Tzr)</label>
+		<location id="id4" x="535" y="-204">
+			<name x="407" y="-221">ZeroResponder</name>
+			<label kind="invariant" x="525" y="-187">x&lt;=1</label>
 		</location>
-		<location id="id5" x="476" y="-314">
-			<name x="391" y="-348">CallingFirstResponder</name>
-			<label kind="comments" x="501" y="-322">remain here for 
+		<location id="id5" x="688" y="-374">
+			<name x="714" y="-382">CallingFirstResponder</name>
+			<label kind="invariant" x="678" y="-357">x&lt;=1</label>
+			<label kind="comments" x="765" y="-433">remain here for 
 dist(surv, FR) time</label>
 		</location>
 		<location id="id6" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
+		<location id="id7" x="535" y="51">
+			<label kind="invariant" x="501" y="68">x &lt;= Tzr</label>
+		</location>
+		<location id="id8" x="705" y="-153">
+			<name x="722" y="-178">Reached_FirstResponder</name>
+			<label kind="invariant" x="688" y="-136">x&lt;=1</label>
+		</location>
+		<location id="id9" x="714" y="25">
+			<name x="722" y="-8">Reached_Need</name>
+			<label kind="invariant" x="704" y="42">x&lt;=Tfr</label>
+		</location>
 		<init ref="id0"/>
-		<transition id="id7">
+		<transition id="id10">
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="guard" x="799" y="-102">posx[id]!=x_need || posy[id]!=y_need</label>
+			<label kind="assignment" x="799" y="-119">moveTo(id,x_need,y_need)</label>
+			<nail x="790" y="-76"/>
+			<nail x="799" y="-153"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id9"/>
+			<target ref="id3"/>
+			<label kind="guard" x="246" y="170">x == Tfr</label>
+			<label kind="assignment" x="255" y="187">x=0</label>
+			<nail x="705" y="170"/>
+			<nail x="238" y="170"/>
+			<nail x="-136" y="170"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="guard" x="722" y="-42">posx[id]==x_need &amp;&amp; posy[id]==y_need</label>
+			<label kind="assignment" x="722" y="-59">x=0</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id5"/>
+			<target ref="id8"/>
+			<label kind="guard" x="705" y="-272">posx[id]== fr_x_coord &amp;&amp; posy[id]== fr_y_coord</label>
+			<label kind="assignment" x="705" y="-289">x=0</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="501" y="-493">posx[id]!= fr_x_coord || posy[id]!= fr_y_coord</label>
+			<label kind="assignment" x="629" y="-476">moveTo(coord fr)</label>
+			<nail x="748" y="-450"/>
+			<nail x="629" y="-450"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id7"/>
+			<target ref="id3"/>
+			<label kind="guard" x="144" y="42">x == Tzr</label>
+			<label kind="synchronisation" x="136" y="76">assist_done!</label>
+			<label kind="assignment" x="161" y="59">x = 0</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id4"/>
+			<target ref="id7"/>
+			<label kind="guard" x="238" y="-85">posx[id]==x_need &amp;&amp; posy[id]==y_need</label>
+			<label kind="assignment" x="501" y="-102">x=0</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="382" y="-306">posx[id]!=x_need || posy[id]!=y_need</label>
+			<label kind="assignment" x="425" y="-289">moveTo(id,x_need,y_need),x=0</label>
+			<nail x="559" y="-264"/>
+			<nail x="474" y="-264"/>
+		</transition>
+		<transition id="id18">
 			<source ref="id2"/>
 			<target ref="id0"/>
 			<label kind="assignment" x="-323" y="-178">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
-		<transition id="id8">
+		<transition id="id19">
 			<source ref="id1"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-875" y="60">assistDone?</label>
+			<label kind="synchronisation" x="-875" y="60">assist_done?</label>
 			<label kind="assignment" x="-884" y="77">need[id] = false</label>
 			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
 			<nail x="-926" y="102"/>
 			<nail x="-391" y="102"/>
 		</transition>
-		<transition id="id9">
+		<transition id="id20">
 			<source ref="id1"/>
 			<target ref="id6"/>
 			<label kind="guard" x="-918" y="-187">x &gt; Tv</label>
 			<label kind="assignment" x="-918" y="-170">need[id] = false</label>
 		</transition>
-		<transition id="id10">
-			<source ref="id5"/>
-			<target ref="id3"/>
-			<nail x="450" y="85"/>
-			<nail x="424" y="110"/>
-			<nail x="263" y="110"/>
-			<nail x="-213" y="110"/>
-		</transition>
-		<transition id="id11">
+		<transition id="id21">
 			<source ref="id2"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="59" y="-331">callFirstResponder[id]?</label>
-			<label kind="assignment" x="127" y="-348">x:=0</label>
-			<nail x="-17" y="-289"/>
+			<label kind="synchronisation" x="93" y="-408">callFirstResponder[id]?</label>
+			<label kind="assignment" x="42" y="-391">x:=0,setting_Coordinates_Need(posx[id], posy[id])</label>
+			<label kind="comments" x="-17" y="-348">da rivedere gestione coordinate Need e coordinate FR</label>
+			<nail x="-76" y="-348"/>
 		</transition>
-		<transition id="id12">
-			<source ref="id4"/>
-			<target ref="id3"/>
-			<label kind="guard" x="-25" y="34">x=(getDistanceFromAssignedNeed() + Tzr)</label>
-			<label kind="synchronisation" x="146" y="68">assist_done!</label>
-			<label kind="assignment" x="180" y="51">x=0</label>
-			<nail x="297" y="25"/>
-		</transition>
-		<transition id="id13">
+		<transition id="id22">
 			<source ref="id2"/>
 			<target ref="id4"/>
-			<label kind="synchronisation" x="93" y="-136">assist?</label>
-			<label kind="assignment" x="110" y="-119">x=0</label>
+			<label kind="synchronisation" x="187" y="-170">assist?</label>
+			<label kind="assignment" x="-25" y="-187">x=0,setting_Coordinates_Need(posx[id], posy[id])</label>
 		</transition>
-		<transition id="id14">
+		<transition id="id23">
 			<source ref="id0"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-578" y="34">isExitNear(posx[id], posy[id])</label>
 			<nail x="-433" y="34"/>
 		</transition>
-		<transition id="id15">
+		<transition id="id24">
 			<source ref="id0"/>
 			<target ref="id2"/>
 			<label kind="guard" x="-450" y="-68">!isFireNear(posx[id], posy[id]) &amp;&amp;
 !isExitNear(posx[id], posy[id])</label>
 		</transition>
-		<transition id="id16">
+		<transition id="id25">
 			<source ref="id0"/>
 			<target ref="id1"/>
 			<label kind="guard" x="-841" y="-110">isFireNear(posx[id], posy[id]) &amp;&amp;
@@ -501,51 +558,51 @@ void patrol() {
     // Update personDetected if a civilian is detected nearby
     personDetected = isCivilianNearby(droneX, droneY);
 }</declaration>
-		<location id="id17" x="-195" y="0">
+		<location id="id26" x="-195" y="0">
 			<name x="-214" y="-34">Patrol</name>
 		</location>
-		<location id="id18" x="450" y="76">
+		<location id="id27" x="450" y="76">
 			<name x="382" y="42">Instruct Zero Responder</name>
 		</location>
-		<location id="id19" x="170" y="0">
+		<location id="id28" x="170" y="0">
 			<name x="25" y="-59">Search for closest responder</name>
 		</location>
-		<location id="id20" x="442" y="-93">
+		<location id="id29" x="442" y="-93">
 			<name x="357" y="-127">Instruct First Responder</name>
 		</location>
-		<init ref="id17"/>
-		<transition id="id21">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<init ref="id26"/>
+		<transition id="id30">
+			<source ref="id27"/>
+			<target ref="id26"/>
 			<nail x="161" y="161"/>
 		</transition>
-		<transition id="id22">
-			<source ref="id20"/>
-			<target ref="id17"/>
+		<transition id="id31">
+			<source ref="id29"/>
+			<target ref="id26"/>
 			<nail x="153" y="-204"/>
 			<nail x="153" y="-204"/>
 		</transition>
-		<transition id="id23">
-			<source ref="id17"/>
-			<target ref="id19"/>
+		<transition id="id32">
+			<source ref="id26"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-119" y="-25">PNADetected</label>
 		</transition>
-		<transition id="id24">
-			<source ref="id17"/>
-			<target ref="id17"/>
+		<transition id="id33">
+			<source ref="id26"/>
+			<target ref="id26"/>
 			<label kind="guard" x="-289" y="76">!PNADetected</label>
 			<nail x="-119" y="67"/>
 			<nail x="-229" y="67"/>
 			<nail x="-255" y="67"/>
 		</transition>
-		<transition id="id25">
-			<source ref="id19"/>
-			<target ref="id18"/>
+		<transition id="id34">
+			<source ref="id28"/>
+			<target ref="id27"/>
 			<label kind="guard" x="238" y="68">distZR &lt; distFR</label>
 		</transition>
-		<transition id="id26">
-			<source ref="id19"/>
-			<target ref="id20"/>
+		<transition id="id35">
+			<source ref="id28"/>
+			<target ref="id29"/>
 			<label kind="guard" x="221" y="-93">distFR &lt; distZR</label>
 		</transition>
 	</template>
