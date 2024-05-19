@@ -13,7 +13,7 @@ const int SURVIVOR = 5;
 const int SAFE = 6;
 const int PNA = 7;
 const int CASUALTY = 8;
-
+const int N = 5;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
@@ -84,6 +84,7 @@ void initializeGrid() {
 </declaration>
 	<template>
 		<name>Civilian</name>
+		<parameter>const int[0,N] id</parameter>
 		<declaration>
 
 clock x;
@@ -316,7 +317,23 @@ bool isExitNear(int x, int y) {
 
     return false; // No exit found nearby
 }
-</declaration>
+
+
+
+/**
+ * @brief Takes distance between ZeroResponder and Civilian in Need assigned to it 
+ *
+ * This function uses global variables xNeed and yNeed to retreive the position
+ * of the Civilian in Need assigned to this specific ZeroResponder 
+ * and calculate the distance by usinge the function moveTo
+ *
+ * @param id The identifier of the civilian to be moved.
+ * @param destx The x-coordinate of the destination.
+ * @param desty The y-coordinate of the destination.
+ */
+int getDistanceFromAssignedNeed(){
+    
+}</declaration>
 		<location id="id0" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
 			<urgent/>
@@ -333,7 +350,7 @@ bool isExitNear(int x, int y) {
 		</location>
 		<location id="id4" x="340" y="-212">
 			<name x="281" y="-246">ZeroResponder</name>
-			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromAssignedNeed() + Tfr)</label>
+			<label kind="invariant" x="110" y="-195">x&lt;(getDistanceFromAssignedNeed() + Tzr)</label>
 		</location>
 		<location id="id5" x="476" y="-314">
 			<name x="391" y="-348">CallingFirstResponder</name>
@@ -384,7 +401,7 @@ dist(surv, FR) time</label>
 		<transition id="id12">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-25" y="34">x=(getDistanceFromAssignedNeed() + Tfr)</label>
+			<label kind="guard" x="-25" y="34">x=(getDistanceFromAssignedNeed() + Tzr)</label>
 			<label kind="synchronisation" x="146" y="68">assist_done!</label>
 			<label kind="assignment" x="180" y="51">x=0</label>
 			<nail x="297" y="25"/>
