@@ -102,7 +102,7 @@ clock x;
 
 int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
-bool need[N_CIVILIANS];       // set to true when civilian is in need
+// todo remove bool need[N_CIVILIANS];       // set to true when civilian is in need
 
 /**
  * @brief Checks if a position is valid within the grid bounds.
