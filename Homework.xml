@@ -295,7 +295,7 @@ void moveTo(int id, int destx, int desty) {
             int new_x = curr_x + DX[i];
             int new_y = curr_y + DY[i];
 
-            if (isValid(new_x, new_y) &amp;&amp; !visited[new_x][new_y] &amp;&amp; grid[new_x][new_y] == EMPTY &amp;&amp; !isFireNear(new_x, new_y)) {
+            if (isValid(new_x, new_y) &amp;&amp; !visited[new_x][new_y] &amp;&amp; grid[new_x][new_y] == EMPTY /*&amp;&amp; !isFireNear(new_x, new_y)*/) {
                 qx[rear] = new_x;
                 qy[rear] = new_y;
                 rear++;
