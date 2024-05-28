@@ -392,8 +392,8 @@ dist(surv, FR) time</label>
 		<transition id="id11">
 			<source ref="id8"/>
 			<target ref="id8"/>
-			<label kind="guard" x="799" y="-102">posx[id]!=x_need || posy[id]!=y_need</label>
-			<label kind="assignment" x="799" y="-119">moveTo(id,x_need,y_need)</label>
+			<label kind="guard" x="799" y="-102">posx[id]!=helping[id][0] || posy[id]!=helping[id][1]</label>
+			<label kind="assignment" x="799" y="-119">moveTo(id,helping[id][0],helping[id][1])</label>
 			<nail x="790" y="-76"/>
 			<nail x="799" y="-153"/>
 		</transition>
@@ -409,7 +409,7 @@ dist(surv, FR) time</label>
 		<transition id="id13">
 			<source ref="id8"/>
 			<target ref="id9"/>
-			<label kind="guard" x="722" y="-42">posx[id]==x_need &amp;&amp; posy[id]==y_need</label>
+			<label kind="guard" x="722" y="-42">posx[id]==helping[id][0] &amp;&amp; posy[id]==helping[id][1]</label>
 			<label kind="assignment" x="722" y="-59">x=0</label>
 		</transition>
 		<transition id="id14">
@@ -444,7 +444,7 @@ dist(surv, FR) time</label>
 			<source ref="id4"/>
 			<target ref="id4"/>
 			<label kind="guard" x="450" y="-306">!isNeedNear(id)</label>
-			<label kind="assignment" x="391" y="-289">moveTo(id,x_need,y_need),x=x+1</label>
+			<label kind="assignment" x="391" y="-289">moveTo(id,helping[id][0],helping[id][1]),x=x+1</label>
 			<nail x="559" y="-264"/>
 			<nail x="474" y="-264"/>
 		</transition>
