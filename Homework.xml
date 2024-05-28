@@ -84,7 +84,7 @@ void initializeGrid() {
 }
 
 
-int abs(int x) {
+int abs_(int x) {
   if (x &lt; 0) {
     return -x;
   }
@@ -147,7 +147,7 @@ bool isFireNear(int x, int y) {
  */
 bool isNeedNear(int id) {
 
-    if(abs(helping[id][0] - posx[id]) == 1 || abs(helping[id][1] - posy[id]) == 1) return true;
+    if(abs_(helping[id][0] - posx[id]) == 1 || abs_(helping[id][1] - posy[id]) == 1) return true;
 
     return false;
 }
@@ -162,7 +162,7 @@ bool isNeedNear(int id) {
  */
 bool isFirstResponderNear(int id) {
 
-    if(abs(calling[id][0] - posx[id]) == 1 || abs(calling[id][1] - posy[id]) == 1) return true;
+    if(abs_(calling[id][0] - posx[id]) == 1 || abs_(calling[id][1] - posy[id]) == 1) return true;
 
     return false;
 }
@@ -235,7 +235,6 @@ void move(int id) {
     }
 }
 
-
 /**
  * @brief Moves a civilian one step towards the specified destination avoiding cells near fire.
  *
@@ -255,8 +254,6 @@ void moveTo(int id, int destx, int desty) {
     // Directions for vertical and horizontal neighbors only
     const int DX[4] = {-1, 1, 0, 0}; // Up, Down
     const int DY[4] = {0, 0, -1, 1}; // Left, Right
-
-    bool path_found;
 
     // Queue for BFS (simulated using arrays)
     int qx[GRID_W * GRID_H];
@@ -282,10 +279,8 @@ void moveTo(int id, int destx, int desty) {
     prev_x[current_x][current_y] = -1;
     prev_y[current_x][current_y] = -1;
 
-    path_found = false;
-
     // BFS loop
-    while (front &lt; rear &amp;&amp; !path_found) {
+    while (front &lt; rear) {
         int curr_x = qx[front];
         int curr_y = qy[front];
         int i;
@@ -304,32 +299,26 @@ void moveTo(int id, int destx, int desty) {
                 prev_y[new_x][new_y] = curr_y;
 
                 if (new_x == destx &amp;&amp; new_y == desty) {
-                    path_found = true;
-                    break;
+                    // Trace back to the first step from the start
+                    int x = destx;
+                    int y = desty;
+
+                    while (prev_x[x][y] != current_x || prev_y[x][y] != current_y) {
+                        int temp_x = prev_x[x][y];
+                        int temp_y = prev_y[x][y];
+                        x = temp_x;
+                        y = temp_y;
+                    }
+
+                    // Move the civilian to the first step towards the destination
+                    posx[id] = x;
+                    posy[id] = y;
+                    return;
                 }
             }
         }
     }
-
-    // If a path was found, trace back from the destination to the start
-    if (path_found) {
-        int x = destx;
-        int y = desty;
-
-        // Trace back to the first step from the start
-        while (prev_x[x][y] != current_x || prev_y[x][y] != current_y) {
-            int temp_x = prev_x[x][y];
-            int temp_y = prev_y[x][y];
-            x = temp_x;
-            y = temp_y;
-        }
-
-        // Move the civilian to the first step towards the destination
-        posx[id] = x;
-        posy[id] = y;
-    }
 }
-
 
 
 /*
@@ -436,7 +425,7 @@ dist(surv, FR) time</label>
 			<source ref="id5"/>
 			<target ref="id5"/>
 			<label kind="guard" x="578" y="-493">!isFirstResponderNear(id)</label>
-			<label kind="assignment" x="629" y="-476">moveTo(coord fr)</label>
+			<label kind="assignment" x="544" y="-476">moveTo(id, calling[id][0], calling[id][1])</label>
 			<nail x="748" y="-450"/>
 			<nail x="629" y="-450"/>
 		</transition>
@@ -486,8 +475,8 @@ dist(surv, FR) time</label>
 		<transition id="id22">
 			<source ref="id2"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="178" y="-416">callFirstResponder[id]?</label>
-			<label kind="assignment" x="42" y="-391">x:=0,setting_Coordinates_Need(posx[id], posy[id])</label>
+			<label kind="synchronisation" x="187" y="-399">callFirstResponder[id]?</label>
+			<label kind="assignment" x="255" y="-382">x:=0</label>
 			<label kind="comments" x="-17" y="-348">da rivedere gestione coordinate Need e coordinate FR</label>
 			<nail x="-76" y="-348"/>
 		</transition>
