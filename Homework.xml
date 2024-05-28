@@ -102,7 +102,6 @@ clock x;
 
 int posx[N_CIVILIANS];       // Array of x coordinates
 int posy[N_CIVILIANS];       // Array of y coordinates
-// todo remove bool need[N_CIVILIANS];       // set to true when civilian is in need
 
 /**
  * @brief Checks if a position is valid within the grid bounds.
@@ -459,7 +458,7 @@ dist(surv, FR) time</label>
 			<source ref="id4"/>
 			<target ref="id4"/>
 			<label kind="guard" x="450" y="-306">!isNeedNear(id)</label>
-			<label kind="assignment" x="391" y="-289">moveTo(id,helping[id][0],helping[id][1]),x=x+1</label>
+			<label kind="assignment" x="272" y="-289">moveTo(id,helping[id][0],helping[id][1]),x=x+1</label>
 			<nail x="559" y="-264"/>
 			<nail x="474" y="-264"/>
 		</transition>
@@ -473,8 +472,8 @@ dist(surv, FR) time</label>
 		<transition id="id20">
 			<source ref="id1"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-875" y="60">assist_done?</label>
-			<label kind="assignment" x="-884" y="77">need[id] = false</label>
+			<label kind="synchronisation" x="-884" y="59">assist_done?</label>
+			<label kind="assignment" x="-884" y="76">grid[posx[id]][posy[id]] = EMPTY</label>
 			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
 			<nail x="-926" y="102"/>
 			<nail x="-391" y="102"/>
@@ -483,7 +482,7 @@ dist(surv, FR) time</label>
 			<source ref="id1"/>
 			<target ref="id6"/>
 			<label kind="guard" x="-918" y="-187">x &gt; Tv</label>
-			<label kind="assignment" x="-918" y="-170">need[id] = false</label>
+			<label kind="assignment" x="-918" y="-170">grid[posx[id]][posy[id]] = EMPTY</label>
 		</transition>
 		<transition id="id22">
 			<source ref="id2"/>
@@ -515,7 +514,7 @@ dist(surv, FR) time</label>
 			<target ref="id1"/>
 			<label kind="guard" x="-841" y="-110">isFireNear(posx[id], posy[id]) &amp;&amp;
 !isExitNear(posx[id], posy[id])</label>
-			<label kind="assignment" x="-765" y="-59">need[id]=true</label>
+			<label kind="assignment" x="-841" y="-59">grid[posx[id]][posy[id]] = NEED</label>
 			<nail x="-595" y="-67"/>
 		</transition>
 	</template>
