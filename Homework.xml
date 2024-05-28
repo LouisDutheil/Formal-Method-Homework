@@ -430,7 +430,6 @@ dist(surv, FR) time</label>
 			<source ref="id5"/>
 			<target ref="id8"/>
 			<label kind="guard" x="705" y="-272">posx[id]== fr_x_coord &amp;&amp; posy[id]== fr_y_coord</label>
-			<label kind="synchronisation" x="705" y="-255">callFirstResponder[id]?</label>
 			<label kind="assignment" x="705" y="-289">x=0</label>
 		</transition>
 		<transition id="id15">
@@ -487,6 +486,7 @@ dist(surv, FR) time</label>
 		<transition id="id22">
 			<source ref="id2"/>
 			<target ref="id5"/>
+			<label kind="synchronisation" x="178" y="-416">callFirstResponder[id]?</label>
 			<label kind="assignment" x="42" y="-391">x:=0,setting_Coordinates_Need(posx[id], posy[id])</label>
 			<label kind="comments" x="-17" y="-348">da rivedere gestione coordinate Need e coordinate FR</label>
 			<nail x="-76" y="-348"/>
