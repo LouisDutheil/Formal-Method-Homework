@@ -94,7 +94,7 @@ int abs_(int x) {
 </declaration>
 	<template>
 		<name>Civilian</name>
-		<parameter>const int[0,N] id, const int[0,10] Tzr, const int[0,10] Tfr</parameter>
+		<parameter>const int[0,N_CIVILIANS] id, const int[0,10] Tzr</parameter>
 		<declaration>
 
 clock x;
@@ -507,47 +507,43 @@ dist(surv, FR) time</label>
 	</template>
 	<template>
 		<name x="5" y="5">Drone</name>
-		<parameter>int[2] patrolStartPoint</parameter>
+		<parameter>int patrolStartPoint[2]</parameter>
 		<declaration>// Place local declarations here.
-patrolStep = 0;
+int patrolStep = 0;
 int droneX = 1, droneY = 1;    //need to find a way to instantiate these variables when the entities are placed on the grid
 void moveDrone() {
-    switch (patrolStep) {
-        case 0: // Move right along the top row of the square
-            if (droneX &lt; 3) {
-                droneX++;
-            } else {
-                patrolStep++;
-            }
-            break;
-        case 1: // Move down along the right column of the square
-            if (droneY &lt; 3) {
-                droneY++;
-            } else {
-                patrolStep++;
-            }
-            break;
-        case 2: // Move left along the bottom row of the square
-            if (droneX &gt; 1) {
-                droneX--;
-            } else {
-                patrolStep++;
-            }
-            break;
-        case 3: // Move up along the left column of the square
-            if (droneY &gt; 1) {
-                droneY--;
-            } else {
-                patrolStep = 0; // Reset patrolStep to repeat the sequence
-            }
-            break;
+    if (patrolStep == 0) { // Move right along the top row of the square
+        if (droneX &lt; 3) {
+            droneX++;
+        } else {
+            patrolStep++;
+        }
+    } else if (patrolStep == 1) { // Move down along the right column of the square
+        if (droneY &lt; 3) {
+            droneY++;
+        } else {
+            patrolStep++;
+        }
+    } else if (patrolStep == 2) { // Move left along the bottom row of the square
+        if (droneX &gt; 1) {
+            droneX--;
+        } else {
+            patrolStep++;
+        }
+    } else if (patrolStep == 3) { // Move up along the left column of the square
+        if (droneY &gt; 1) {
+            droneY--;
+        } else {
+            patrolStep = 0; // Reset patrolStep to repeat the sequence
+        }
     }
 }
 
 bool isCivilianNearby(int x, int y) {
+    int dx,dy;
     // Check the eight neighboring cells around the drone position
-    for (int dx = -1; dx &lt;= 1; dx++) {
-        for (int dy = -1; dy &lt;= 1; dy++) {
+    for (dx = -1; dx &lt;= 1; dx++) {
+        for (dy = -1; dy &lt;= 1; dy++) {
             // Skip the current cell (the drone's position)
             if (dx == 0 &amp;&amp; dy == 0) {
                 continue;
@@ -555,16 +551,16 @@ bool isCivilianNearby(int x, int y) {
             int nx = x + dx;
             int ny = y + dy;
             // Check if the neighboring cell is within the grid bounds
-            if (nx &gt;= 0 &amp;&amp; nx &lt; WIDTH &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; HEIGHT) {
+            if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
                 // Check if the neighboring cell contains a civilian
-                if (grid[nx][ny] == CIVILIAN) {
+                if (grid[nx][ny] == SURVIVOR || grid[nx][ny] == SAFE || grid[nx][ny] == NEED ) {
                     return true; // Civilian detected nearby
                 }
             }
         }
     }
     return false; // No civilian detected nearby
-}
+} 
 
 void patrol() {
     // Move the drone to the next position in the patrol sequence
@@ -574,16 +570,16 @@ void patrol() {
     personDetected = isCivilianNearby(droneX, droneY);
 }</declaration>
 		<location id="id27" x="-195" y="0">
-			<name x="-214" y="-34">Patrol</name>
+			<name x="-229" y="-34">Patrol</name>
 		</location>
 		<location id="id28" x="450" y="76">
-			<name x="382" y="42">Instruct Zero Responder</name>
+			<name x="382" y="42">Instruct_Zero_Responder</name>
 		</location>
 		<location id="id29" x="170" y="0">
-			<name x="25" y="-59">Search for closest responder</name>
+			<name x="34" y="-42">Search_closest_responder</name>
 		</location>
 		<location id="id30" x="442" y="-93">
-			<name x="357" y="-127">Instruct First Responder</name>
+			<name x="357" y="-127">Instruct_First_Responder</name>
 		</location>
 		<init ref="id27"/>
 		<transition id="id31">
