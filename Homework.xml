@@ -381,7 +381,6 @@ dist(surv, FR) time</label>
 		</location>
 		<location id="id9" x="714" y="25">
 			<name x="722" y="-8">ReachedNeed</name>
-			<label kind="invariant" x="704" y="42">x&lt;=Tfr</label>
 		</location>
 		<init ref="id0"/>
 		<transition id="id10">
@@ -403,8 +402,7 @@ dist(surv, FR) time</label>
 		<transition id="id12">
 			<source ref="id9"/>
 			<target ref="id3"/>
-			<label kind="guard" x="246" y="170">x == Tfr</label>
-			<label kind="assignment" x="255" y="187">x=0</label>
+			<label kind="assignment" x="263" y="170">x=0</label>
 			<nail x="705" y="170"/>
 			<nail x="238" y="170"/>
 			<nail x="-136" y="170"/>
