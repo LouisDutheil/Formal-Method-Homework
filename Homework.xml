@@ -36,6 +36,7 @@ int grid[GRID_H][GRID_W];    // map
 //todo remove int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = value
 
 int helping[N_CIVILIANS][2]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
+int calling[N_CIVILIANS][2]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 
 
 /*********GLOBAL VARIABLES*************************/
@@ -89,7 +90,6 @@ int abs(int x) {
   }
   return x;
 }
-
 
 </declaration>
 	<template>
@@ -149,6 +149,21 @@ bool isFireNear(int x, int y) {
 bool isNeedNear(int id) {
 
     if(abs(helping[id][0] - posx[id]) == 1 || abs(helping[id][1] - posy[id]) == 1) return true;
+
+    return false;
+}
+
+/**
+ * @brief Checks if a zero responder is near the person to help.
+ *
+ * @param id the id of the zero responder.
+ * @param x The x-coordinate to check.
+ * @param y The y-coordinate to check.
+ * @return true if the position is near the person to help, false otherwise.
+ */
+bool isFirstResponderNear(int id) {
+
+    if(abs(calling[id][0] - posx[id]) == 1 || abs(calling[id][1] - posy[id]) == 1) return true;
 
     return false;
 }
