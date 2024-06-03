@@ -347,7 +347,7 @@ bool isExitNear(int x, int y) {
 		</location>
 		<location id="id4" x="238" y="-68">
 			<name x="179" y="-102">ZeroResponder</name>
-			<label kind="invariant" x="93" y="-59">x &lt; calculateDistance(id, x,y)</label>
+			<label kind="invariant" x="-17" y="-51">x &lt; calculateDistance(id,helping[id][0],helping[id][1])</label>
 		</location>
 		<location id="id5" x="484" y="-348">
 			<name x="382" y="-382">CallingFirstResponder</name>
@@ -356,22 +356,23 @@ bool isExitNear(int x, int y) {
 		<location id="id6" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
-		<location id="id7" x="246" y="34">
-			<label kind="invariant" x="212" y="51">x &lt;= Tzr</label>
+		<location id="id7" x="238" y="34">
+			<label kind="invariant" x="204" y="51">x &lt;= Tzr</label>
 		</location>
 		<location id="id8" x="484" y="-161">
 			<name x="501" y="-186">ReachedFirstResponder</name>
-			<label kind="invariant" x="314" y="-144">x&lt;=calculateDistance(id,helping[id][0],helping[id][1])</label>
+			<label kind="invariant" x="306" y="-144">x&lt;=calculateDistance(id,helping[id][0],helping[id][1])</label>
 		</location>
 		<location id="id9" x="493" y="34">
 			<name x="501" y="1">ReachedNeed</name>
-			<label kind="invariant" x="442" y="60">x &lt;= Tzr</label>
+			<label kind="invariant" x="467" y="59">x &lt;= Tzr</label>
 		</location>
 		<init ref="id0"/>
 		<transition id="id10">
 			<source ref="id9"/>
 			<target ref="id3"/>
-			<label kind="assignment" x="263" y="170">x=0</label>
+			<label kind="assignment" x="119" y="127">x=0,
+grid[posx[id]][posy[id]] = EMPTY</label>
 			<nail x="493" y="170"/>
 			<nail x="238" y="170"/>
 			<nail x="-136" y="170"/>
