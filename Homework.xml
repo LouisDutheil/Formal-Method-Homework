@@ -282,9 +282,11 @@ int calculateDistance(int id, int destx, int desty) {
         int curr_x = qx[front];
         int curr_y = qy[front];
         int curr_dist = dist[front];
+        int i;
+
         front++;
 
-        for (int i = 0; i &lt; 4; i++) {
+        for (i = 0; i &lt; 4; i++) {
             int new_x = curr_x + DX[i];
             int new_y = curr_y + DY[i];
 
