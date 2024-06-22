@@ -193,7 +193,8 @@ int zr_tocommto; // id zr to contact when finishing Tfr
  */
 bool isValid(int x, int y) {
     if(x &gt;= 0 &amp;&amp; x &lt; GRID_W-1 &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; GRID_H-1){
-    return true;}
+        return true;
+    }
     return false;
 }
 
@@ -493,6 +494,9 @@ int Tzr;
 int waiting_helping;
 int waiting_fr;
 
+/**
+ * @brief set the time it takes for a specific survivor to help a person in need once reached
+ */
 void setTzr(){
     Tzr= 7; 
 }
@@ -729,10 +733,16 @@ bool isExitNear(int x, int y) {
     return false; // No exit found nearby
 }
 
+/**
+ * @brief sets time it takes for a civilian to reach the person in need
+ */
 void set_waiting(){
    waiting_helping = calculateDistance(id,helping[id][0],helping[id][1]);
 }
 
+/**
+ * @brief sets time it takes for a civilian to reach the first responder
+ */
 void set_waitingfr(){
    waiting_fr = calculateDistance(id,calling[id][0],calling[id][1]);
 }</declaration>
@@ -781,6 +791,9 @@ void set_waitingfr(){
 			<target ref="id12"/>
 			<label kind="guard" x="-497" y="-144">true</label>
 			<label kind="assignment" x="-569" y="-136">setTzr()</label>
+			<label kind="comments" x="-620" y="-272">Putting a guard as always true is
+ like not putting any guard as my
+ understanding</label>
 		</transition>
 		<transition id="id24">
 			<source ref="id21"/>
@@ -788,6 +801,12 @@ void set_waitingfr(){
 			<label kind="synchronisation" x="102" y="144">assistDone[id]?</label>
 			<label kind="assignment" x="110" y="161">x=0,
 grid[posy[id]][posx[id]] = EMPTY</label>
+			<label kind="comments" x="442" y="68">What if the person in need dies 
+before the first responder can help him? 
+In that case this zero responder
+ would be stuck.
+I would add a signal from the dead person that
+notifies everyone about the death</label>
 			<nail x="484" y="204"/>
 			<nail x="229" y="204"/>
 			<nail x="-145" y="204"/>
