@@ -903,32 +903,39 @@ int patrolStep = 0;
 int droneX = 1, droneY = 1;    //need to find a way to instantiate these variables when the entities are placed on the grid
 bool personDetected;
 int distZR, distFR, PNADetected;
-void moveDrone() {
-    if (patrolStep == 0) { // Move right along the top row of the square
-        if (droneX &lt; 3) {
-            droneX++;
+/**
+ * @brief Moves the drone in an horizontal line
+ * This functions moves the drone on a horizontal patrol route, 
+ * The starting direction depends on the drone's initial position  
+ *
+ * @param id the drone id
+ */
+void dronePatrol(int id) {
+    if (pos[id].x =&lt; GRID_W/2)
+        isMovingRight = true;
+    else
+        isMovingRight = false;
+    // Check current direction and move accordingly
+    if (isMovingRight) {
+        // Move right
+        if (pos[id].x &lt; GRID_W - 1) {
+            pos[id].x++;
         } else {
-            patrolStep++;
+            // Reached the right end, change direction to left
+            isMovingRight = false;
+            pos[id].x--;
         }
-    } else if (patrolStep == 1) { // Move down along the right column of the square
-        if (droneY &lt; 3) {
-            droneY++;
+    } else {
+        // Move left
+        if (pos[id].x &gt; 0) {
+            pos[id].x--;
         } else {
-            patrolStep++;
-        }
-    } else if (patrolStep == 2) { // Move left along the bottom row of the square
-        if (droneX &gt; 1) {
-            droneX--;
-        } else {
-            patrolStep++;
-        }
-    } else if (patrolStep == 3) { // Move up along the left column of the square
-        if (droneY &gt; 1) {
-            droneY--;
-        } else {
-            patrolStep = 0; // Reset patrolStep to repeat the sequence
+            // Reached the left end, change direction to right
+            isMovingRight = true;
+            pos[id].x++;
         }
     }
+}
 }
 
 bool isCivilianNearby(int x, int y) {
