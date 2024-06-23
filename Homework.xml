@@ -85,6 +85,16 @@ void initializeGrid() {
 }
 
 
+/*** GLOBAL UTILITY FUNCTIONS ************************************************/
+
+/*
+ * Get the value of a cell of the map given its pos_t coordinates.
+ */
+int cell(pos_t p) {
+    return grid[p.x][p.y];
+}
+
+
 int abs_(int x) {
   if (x &lt; 0) {
     return -x;
