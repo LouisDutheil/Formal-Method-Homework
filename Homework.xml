@@ -900,6 +900,7 @@ grid[posy[id]][posx[id]] = EMPTY</label>
 		<parameter>int patrolStartPoint[2]</parameter>
 		<declaration>// Place local declarations here.
 int patrolStep = 0;
+pos_t pos[N_DRONES];
 int droneX = 1, droneY = 1;    //need to find a way to instantiate these variables when the entities are placed on the grid
 bool personDetected;
 int distZR, distFR, PNADetected;
