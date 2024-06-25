@@ -6,7 +6,7 @@ const int EMPTY = 0;
 const int FIRE = 1;
 const int EXIT = 2;
 
-const int DRONE = 3;                //drones must not be placed on the grid because they're supposed to be able to hover over human entities (should not take room in the table)
+const int DRONE = 3;                //drones must not be placed on the grid with other entities because they're supposed to be able to hover over human entities (should not take room in the table)
 const int FIRSTRESPONDER = 4;
 
 const int SURVIVOR = 5;
@@ -21,11 +21,13 @@ const int N = 5;
 const int GRID_W = 10; //grid width
 const int GRID_H = 10; //grid height
 const int N_CIVILIANS = 5;  // Total number of civilians
+const int N_DRONES = 3; //Total number of drones 
 const int N_FR = 3; // Total number of first responders
 const int Tv = 10; //time for the civilian to die close to a fire
 const int Tfr = 10; //time to save a person
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
+typedef struct { int x, y; } pos_t;
 
 /*********GLOBAL SYSTEM PARAMETERS ****************/
 
@@ -34,8 +36,10 @@ typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
 
 int grid[GRID_H][GRID_W];    // map considering role
 // arrays used to put in relations ids with positions of entities (useful for drones too when contacting zero responders)
-int posx[N_CIVILIANS+N_FR];       // Array of x coordinates of all civ+fr 
-int posy[N_CIVILIANS+N_FR];       // Array of y coordinates of all civ+fr
+pos_t pos[N_CIVILIANS+N_FR];        // Array of coordinates of all civ+fr
+// int posx[N_CIVILIANS+N_FR];       // Array of x coordinates of all civ+fr 
+// int posy[N_CIVILIANS+N_FR];       // Array of y coordinates of all civ+fr
+pos_t posDrone[N_DRONES];
 
 //todo remove int xNeed[GRID_H][GRID_W];   // X coordinate for need requests, xNeed[1][2] set to 5 indicates that the civilian found at coordinates (y=1,x=2) is in charge of saving the person in need found at x = 5  
 //todo remove int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = value
@@ -57,9 +61,31 @@ chan assist_fromZR[N_FR];  // zero responders contact fr
 
 /*** GLOBAL TYPES *********************************/
 
+
+
 //...
 
-/*** GLOBAL TYPES *************************************/
+/*** GLOBAL FUNCTIONS *************************************/
+
+int cell(pos_t p) {
+    return grid[p.x][p.y];
+}
+
+//Place the entity on the grid and register it in its respective array
+void placeEntity(int id, int X, int Y, int entityType){
+    grid[Y][X] = entityType;
+    if (entityType == FIRSTRESPONDER || entityType == CIVILIAN){
+        pos[id].x = X;
+        pos[id].y = Y;
+    }
+    else if(entityType == DRONE){
+        posDrone[id].x = X;
+        posDrone[id].y = Y;
+    }
+    
+
+}
+
 
 void initializeGrid() {
     // Set all cells to EMPTY initially
@@ -70,6 +96,8 @@ void initializeGrid() {
             grid[i][j] = EMPTY;
         }
     }
+
+
     // Place exits in predefined positions
     grid[4][0] = EXIT;
     grid[5][0] = EXIT;
@@ -89,40 +117,28 @@ void initializeGrid() {
     grid[3][5] = FIRE;
 
     //Place Civilians
-    grid [5][1] = CIVILIAN;
-    grid [6][3] = CIVILIAN;
-    grid [8][5] = CIVILIAN;
-    grid [1][8] = CIVILIAN;
-    grid [3][6] = CIVILIAN;
+    placeEntity(0, 1, 5, CIVILIAN);
+    placeEntity(1, 3, 6, CIVILIAN);
+    placeEntity(2, 5, 8, CIVILIAN);
+    placeEntity(3, 8, 1, CIVILIAN);
+    placeEntity(4, 6, 3, CIVILIAN);
     //command to initialize the civilian automata with its coordinates
 
     //Place First Responders
-    grid[2][1] = FIRSTRESPONDER;
-    grid[4][6] = FIRSTRESPONDER;
-    grid[7][8] = FIRSTRESPONDER;
+    placeEntity(5, 1, 2, FIRSTRESPONDER);
+    placeEntity(6, 6, 4, FIRSTRESPONDER);
+    placeEntity(7, 8, 7, FIRSTRESPONDER);
+   
     
     //command to initialize the firstresponder automata with its coordinates
 
     //Place Drones
+    placeEntity(0, 1, 0, DRONE);
+    placeEntity(0, 4, 0, DRONE);
+    placeEntity(0, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
-    // define posx,posy array for zero responder and first responder 
-    posx[0]=1;
-    posx[1]=3;
-    posx[2]=5;
-    posx[3]=8;
-    posx[4]=6;
-    posx[5]=1;
-    posx[6]=6;
-    posx[7]=8;
-    posy[0]=5;
-    posy[1]=6;
-    posy[2]=8;
-    posy[3]=1;
-    posy[4]=3;
-    posy[5]=2;
-    posy[6]=4;
-    posy[7]=7;
+  
     
 }
 
@@ -135,7 +151,7 @@ int abs_(int x) {
 }
 
 /**
- * @brief Given coordinates x,y search in posx,posy array to get the id of the civilian
+ * @brief Given coordinates x,y search in pos array to get the id of the civilian
  *
  * @param x The x-coordinate.
  * @param y The y-coordinate.
@@ -144,7 +160,7 @@ int abs_(int x) {
 int getIdFromPos_Civilian(int x,int y){
    int i;
    for(i=0;i&lt;N_CIVILIANS;i++){
-       if(posx[i]== x &amp;&amp; posy[i]== y){
+       if(pos[i].x== x &amp;&amp; pos[i].y== y){
          return i;
         }    
     }
@@ -152,7 +168,7 @@ int getIdFromPos_Civilian(int x,int y){
 }
 
 /**
- * @brief Given coordinates x,y search in posx,posy array to get the id of the first responder
+ * @brief Given coordinates x,y search in pos array to get the id of the first responder
  *
  * @param x The x-coordinate.
  * @param y The y-coordinate.
@@ -161,12 +177,14 @@ int getIdFromPos_Civilian(int x,int y){
 int getIdFromPos_FirstResponder(int x,int y){
     int i;
     for(i=N_CIVILIANS;i&lt;N_CIVILIANS+N_FR;i++){
-       if(posx[i]== x &amp;&amp; posy[i]== y){
+       if(pos[i].x== x &amp;&amp; pos[i].y== y){
          return i;
         }    
     }
     return -1;
 }
+
+
 
 </declaration>
 	<template>
@@ -269,8 +287,8 @@ void saveId_rescuing(int x, int y){
  */
 void move(int id) {
     // Current position of the civilian
-    int current_x = posx[id];
-    int current_y = posy[id];
+    int current_x = pos[id].x;
+    int current_y = pos[id].y;
     int new_x;
     int new_y;
 
@@ -318,8 +336,8 @@ void move(int id) {
     // Check if the new position is valid and not near fire
     if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H) {
         if (grid[new_y][new_x] == EMPTY &amp;&amp; !isFireNear(new_x, new_y)) {
-            posx[id] = new_x;
-            posy[id] = new_y;
+            pos[id].x = new_x;
+            pos[id].y = new_y;
             grid[current_y][current_x] = EMPTY;
             grid[new_y][new_x] = FIRSTRESPONDER; //update the grid
         }
@@ -340,8 +358,8 @@ void move(int id) {
  */
 int calculateDistance(int id, int destx, int desty) {
     // Current position of the civilian
-    int current_x = posx[id];
-    int current_y = posy[id];
+    int current_x = pos[id].x;
+    int current_y = pos[id].y;
 
     // Directions for vertical and horizontal neighbors only
     const int DX[4] = {-1, 1, 0, 0}; // Up, Down
@@ -459,12 +477,12 @@ void set_waiting(int x,int y){
 			<source ref="id0"/>
 			<target ref="id2"/>
 			<label kind="synchronisation" x="59" y="0">assist_fromZR[id-N_CIVILIANS]?</label>
-			<label kind="assignment" x="42" y="17">x=0,set_waiting(posx[id],posy[id])</label>
+			<label kind="assignment" x="42" y="17">x=0,set_waiting(pos[id].x,pos[id].y)</label>
 		</transition>
 		<transition id="id9">
 			<source ref="id0"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-68" y="-161">!isNeedNear(posx[id],posy[id])</label>
+			<label kind="guard" x="-68" y="-161">!isNeedNear(pos[id].x,pos[id].y)</label>
 			<label kind="assignment" x="0" y="-144">move(id)</label>
 			<nail x="-42" y="-119"/>
 			<nail x="85" y="-119"/>
@@ -478,9 +496,9 @@ void set_waiting(int x,int y){
 		<transition id="id11">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-297" y="-25">isNeedNear(posx[id],posy[id])</label>
+			<label kind="guard" x="-297" y="-25">isNeedNear(pos[id].x,pos[id].y)</label>
 			<label kind="synchronisation" x="-263" y="-42">assistDone[id_rescuing]!</label>
-			<label kind="assignment" x="-348" y="0">x=0,saveId_rescuing(posx[id],posy[id])</label>
+			<label kind="assignment" x="-348" y="0">x=0,saveId_rescuing(pos[id].x,pos[id].y)</label>
 			<label kind="comments" x="-357" y="-68">must perfom isNeedNear before assist</label>
 			<nail x="-254" y="0"/>
 			<nail x="-254" y="0"/>
@@ -546,7 +564,7 @@ bool isFireNear(int x, int y) {
  */
 bool isNeedNear(int id) {
 
-    if(abs_(helping[id][0] - posx[id]) == 1 || abs_(helping[id][1] - posy[id]) == 1) return true;
+    if(abs_(helping[id][0] - pos[id].x) == 1 || abs_(helping[id][1] - pos[id].y) == 1) return true;
 
     return false;
 }
@@ -561,7 +579,7 @@ bool isNeedNear(int id) {
  */
 bool isFirstResponderNear(int id) {
 
-    if(abs_(calling[id][0] - posx[id]) == 1 || abs_(calling[id][1] - posy[id]) == 1) return true;
+    if(abs_(calling[id][0] - pos[id].x) == 1 || abs_(calling[id][1] - pos[id].y) == 1) return true;
 
     return false;
 }
@@ -577,8 +595,8 @@ bool isFirstResponderNear(int id) {
  */
 void move(int id) {
     // Current position of the civilian
-    int current_x = posx[id];
-    int current_y = posy[id];
+    int current_x = pos[id].x;
+    int current_y = pos[id].y;
     int new_x;
     int new_y;
 
@@ -626,8 +644,8 @@ void move(int id) {
     // Check if the new position is valid and not near fire
     if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H) {
         if (grid[new_y][new_x] == EMPTY &amp;&amp; !isFireNear(new_x, new_y)) {
-            posx[id] = new_x;
-            posy[id] = new_y;
+            pos[id].x = new_x;
+            pos[id].y = new_y;
             grid[current_y][current_x] = EMPTY;
             grid[new_y][new_x] = SURVIVOR; //update the grid
         }
@@ -647,8 +665,8 @@ void move(int id) {
  */
 int calculateDistance(int id, int destx, int desty) {
     // Current position of the civilian
-    int current_x = posx[id];
-    int current_y = posy[id];
+    int current_x = pos[id].x;
+    int current_y = pos[id].y;
 
     // Directions for vertical and horizontal neighbors only
     const int DX[4] = {-1, 1, 0, 0}; // Up, Down
@@ -800,7 +818,7 @@ void set_waitingfr(){
 			<target ref="id15"/>
 			<label kind="synchronisation" x="102" y="144">assistDone[id]?</label>
 			<label kind="assignment" x="110" y="161">x=0,
-grid[posy[id]][posx[id]] = EMPTY</label>
+grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<label kind="comments" x="442" y="68">What if the person in need dies 
 before the first responder can help him? 
 In that case this zero responder
@@ -830,7 +848,7 @@ notifies everyone about the death</label>
 			<label kind="guard" x="-93" y="-25">x&gt;=Tzr</label>
 			<label kind="synchronisation" x="-187" y="42">assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
 			<label kind="assignment" x="-93" y="-8">x = 0,
-grid[posy[id]][posx[id]] = EMPTY</label>
+grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
 		<transition id="id28">
 			<source ref="id16"/>
@@ -849,7 +867,7 @@ grid[posy[id]][posx[id]] = EMPTY</label>
 			<source ref="id13"/>
 			<target ref="id15"/>
 			<label kind="synchronisation" x="-884" y="59">assistDone[id]?</label>
-			<label kind="assignment" x="-884" y="76">grid[posy[id]][posx[id]] = EMPTY</label>
+			<label kind="assignment" x="-884" y="76">grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
 			<nail x="-926" y="102"/>
 			<nail x="-391" y="102"/>
@@ -858,7 +876,7 @@ grid[posy[id]][posx[id]] = EMPTY</label>
 			<source ref="id13"/>
 			<target ref="id18"/>
 			<label kind="guard" x="-918" y="-187">x &gt; Tv</label>
-			<label kind="assignment" x="-918" y="-170">grid[posy[id]][posx[id]] = EMPTY</label>
+			<label kind="assignment" x="-918" y="-170">grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
 		<transition id="id32">
 			<source ref="id14"/>
@@ -876,22 +894,22 @@ grid[posy[id]][posx[id]] = EMPTY</label>
 		<transition id="id34">
 			<source ref="id12"/>
 			<target ref="id15"/>
-			<label kind="guard" x="-578" y="34">isExitNear(posx[id], posy[id])</label>
-			<label kind="assignment" x="-586" y="51">grid[posy[id]][posx[id]] = EMPTY</label>
+			<label kind="guard" x="-578" y="34">isExitNear(pos[id].x, pos[id].y)</label>
+			<label kind="assignment" x="-586" y="51">grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id35">
 			<source ref="id12"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-450" y="-68">!isFireNear(posx[id], posy[id]) &amp;&amp;
-!isExitNear(posx[id], posy[id])</label>
+			<label kind="guard" x="-450" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
+!isExitNear(pos[id].x, pos[id].y)</label>
 		</transition>
 		<transition id="id36">
 			<source ref="id12"/>
 			<target ref="id13"/>
-			<label kind="guard" x="-841" y="-110">isFireNear(posx[id], posy[id]) &amp;&amp;
-!isExitNear(posx[id], posy[id])</label>
-			<label kind="assignment" x="-841" y="-59">grid[posy[id]][posx[id]] = NEED</label>
+			<label kind="guard" x="-841" y="-110">isFireNear(pos[id].x, pos[id].y) &amp;&amp;
+!isExitNear(pos[id].x, pos[id].y)</label>
+			<label kind="assignment" x="-841" y="-59">grid[pos[id].y][pos[id].x] = NEED</label>
 			<nail x="-595" y="-67"/>
 		</transition>
 	</template>
