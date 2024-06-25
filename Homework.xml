@@ -48,7 +48,7 @@ int calling[N_CIVILIANS][2]; // calling {{1, 5}, {-1, -1}} means that civilian w
 
 /*** CHANNELS *************************************/
 
-chan assist[N_CIVILIANS]; // Channel used by drones to request first responders or survivors to assist
+chan assist[N_CIVILIANS]; // Channel used by drones to request survivors to assist
 chan callFirstResponder[N_CIVILIANS]; //Channel used by drones to request survivors to call a first responder to help a person in need
 chan assistDone[N_CIVILIANS]; // Channel used by civilian when they're saved by a zero responder/first responder
 chan assist_fromZR[N_FR];  // zero responders contact fr 
