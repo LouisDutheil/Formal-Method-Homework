@@ -878,8 +878,8 @@ notifies everyone about the death</label>
 			<source ref="id24"/>
 			<target ref="id25"/>
 			<label kind="guard" x="867" y="-51">x&gt;=waiting_helping</label>
-			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id][0],calling[id][1])-N_CIVILIANS]!
-assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
+			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id])-N_CIVILIANS]!
+assistDone[getIdFromPos_Civilian(helping[id])]!</label>
 			<label kind="assignment" x="867" y="-34">x=0</label>
 			<label kind="comments" x="884" y="34">doesn't work with 2 channels contemporary on the same edge</label>
 		</transition>
@@ -1037,12 +1037,27 @@ void checkSurroundings(int id){
         }
     }
 }
+
+//Functions used to check if a PNA/Survivor/First_responder has been detected during the surrouding check using the variables pos of each entity
 bool isPNANearby(){
-    if (posPNA.x == -1 &amp;&amp; posPNA.y ==-1)
+    if (posPNA == DEF_POS)
         return false;
 return true;
 }
 
+bool isSurvNearby(){
+    if (posSurv == DEF_POS)
+        return false;
+return true;
+}
+
+bool isFRNearby(){
+    if (posFR == DEF_POS)
+        return false;
+return true;
+}
+
+//Function that resets all the data taken from the previous surrounding check in order to be ready for the next one
 void resetPos(){
     
     posPNA = DEF_POS;
@@ -1051,31 +1066,17 @@ void resetPos(){
     idFR = -1;
     idSurv = -1;
 }
-bool isSurvNearby(){
-    if (posSurv.x == -1 &amp;&amp; posSurv.y ==-1)
-        return false;
-return true;
-}
-
-bool isFRNearby(){
-    if (posFR.x == -1 &amp;&amp; posFR.y ==-1)
-        return false;
-return true;
-}
-
 
 //Checks in the calling and helping table if the survivor detected by the drone is available or already busy
 bool isSurvAvailable(){
-    int id = getIdFromPos_Civilian(posSurv);
-    if(calling[id] == DEF_POS &amp;&amp; helping[id] == DEF_POS)
-        return true;
+    if(calling[idSurv] != DEF_POS || helping[idSurv] != DEF_POS)
+        return false;
     else
-        return false; 
+        return true; 
 }
 
-bool isFRAvailable(){
-    int id = getIdFromPos_FirstResponder(posFR);
-    if(FRHelping[id] == DEF_POS)
+bool isFRAvailable(){;
+    if(FRHelping[idFR] == DEF_POS)
         return true;
     else
         return false;
@@ -1083,8 +1084,7 @@ bool isFRAvailable(){
 
 
 void putSurvBusy(){
-    int id = getIdFromPos_Civilian(posSurv);
-    calling[id] = posPNA;
+    calling[idSurv] = posPNA;
     
 }
 
