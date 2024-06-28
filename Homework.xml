@@ -10,6 +10,7 @@ const int DRONE = 3;                //drones must not be placed on the grid with
 const int FIRSTRESPONDER = 4;
 
 const int SURVIVOR = 5;
+const int BUSY_SURVIVOR = 10;
 const int SAFE = 6;
 const int NEED = 7;
 const int CIVILIAN = 8;
@@ -532,6 +533,7 @@ void set_waiting(int x,int y){
 		<name>Civilian</name>
 		<parameter>const id_zr id</parameter>
 		<declaration>clock x;
+//Time required for the civilian to save a person in need once reached
 int Tzr;
 int waiting_helping;
 int waiting_fr;
@@ -801,7 +803,7 @@ void set_waitingfr(){
 			<label kind="invariant" x="-936" y="-51">x&lt;=Tv</label>
 		</location>
 		<location id="id18" x="-102" y="-68">
-			<name x="-136" y="-102">Survivor</name>
+			<name x="-136" y="-51">Survivor</name>
 		</location>
 		<location id="id19" x="-238" y="110">
 			<name x="-263" y="76">Saved</name>
@@ -817,100 +819,113 @@ void set_waitingfr(){
 		<location id="id22" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
-		<location id="id23" x="238" y="127">
-			<label kind="invariant" x="255" y="118">x &lt;= Tzr</label>
+		<location id="id23" x="238" y="119">
+			<label kind="invariant" x="255" y="110">x &lt;= Tzr</label>
 		</location>
 		<location id="id24" x="850" y="-119">
 			<name x="867" y="-144">ReachedFirstResponder</name>
 			<label kind="invariant" x="816" y="-102">x&lt;=waiting_helping</label>
 		</location>
-		<location id="id25" x="850" y="255">
-			<name x="858" y="222">ReachedNeed</name>
+		<location id="id25" x="850" y="263">
+			<name x="858" y="230">ReachedNeed</name>
 		</location>
 		<location id="id26" x="-501" y="-161">
 			<name x="-511" y="-195">Initializer</name>
 			<urgent/>
 		</location>
+		<location id="id27" x="238" y="-246">
+			<urgent/>
+		</location>
+		<location id="id28" x="340" y="263">
+			<urgent/>
+		</location>
 		<init ref="id26"/>
-		<transition id="id27">
-			<source ref="id24"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="127" y="-306">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
-			<nail x="612" y="-314"/>
-			<nail x="68" y="-314"/>
-		</transition>
-		<transition id="id28">
-			<source ref="id21"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="144" y="-382">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
-			<nail x="629" y="-357"/>
-			<nail x="59" y="-357"/>
-		</transition>
 		<transition id="id29">
-			<source ref="id20"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="-59" y="-212">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
-			<nail x="76" y="-187"/>
+			<source ref="id25"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="374" y="323">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<nail x="748" y="314"/>
+			<nail x="450" y="314"/>
 		</transition>
 		<transition id="id30">
+			<source ref="id28"/>
+			<target ref="id19"/>
+			<label kind="assignment" x="-110" y="221">x=0,
+grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<nail x="-238" y="263"/>
+		</transition>
+		<transition id="id31">
+			<source ref="id27"/>
+			<target ref="id18"/>
+			<label kind="assignment" x="-85" y="-187">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
+		</transition>
+		<transition id="id32">
+			<source ref="id24"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="280" y="-246">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<nail x="697" y="-246"/>
+		</transition>
+		<transition id="id33">
+			<source ref="id21"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="221" y="-390">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<nail x="731" y="-365"/>
+			<nail x="357" y="-365"/>
+		</transition>
+		<transition id="id34">
+			<source ref="id20"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="161" y="-153">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+		</transition>
+		<transition id="id35">
 			<source ref="id26"/>
 			<target ref="id16"/>
 			<label kind="synchronisation" x="-578" y="-153">starting?</label>
 			<label kind="assignment" x="-569" y="-136">setTzr()</label>
 		</transition>
-		<transition id="id31">
+		<transition id="id36">
 			<source ref="id25"/>
-			<target ref="id19"/>
-			<label kind="synchronisation" x="127" y="238">assistDone[id]?</label>
-			<label kind="assignment" x="127" y="263">x=0,
-grid[pos[id].y][pos[id].x] = EMPTY</label>
-			<label kind="comments" x="901" y="102">What if the person in need dies 
-before the first responder can help him? 
-In that case this zero responder
- would be stuck.
-I would add a signal from the dead person that
-notifies everyone about the death</label>
-			<nail x="493" y="263"/>
-			<nail x="221" y="263"/>
-			<nail x="-153" y="263"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="518" y="178">assistDone[id]?</label>
+			<nail x="731" y="204"/>
+			<nail x="442" y="204"/>
 		</transition>
-		<transition id="id32">
+		<transition id="id37">
 			<source ref="id24"/>
 			<target ref="id25"/>
 			<label kind="guard" x="867" y="-51">x&gt;=waiting_helping</label>
-			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id][0],calling[id][1])-N_CIVILIANS]!;
-assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
+			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id][0],calling[id][1])-N_CIVILIANS]!</label>
 			<label kind="assignment" x="867" y="-34">x=0</label>
 			<label kind="comments" x="884" y="34">doesn't work with 2 channels contemporary on the same edge</label>
 		</transition>
-		<transition id="id33">
+		<transition id="id38">
 			<source ref="id21"/>
 			<target ref="id24"/>
 			<label kind="guard" x="858" y="-357">x &gt;= waiting_fr</label>
 			<label kind="assignment" x="858" y="-340">x=0, set_waiting()</label>
 		</transition>
-		<transition id="id34">
+		<transition id="id39">
 			<source ref="id23"/>
 			<target ref="id19"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
 			<label kind="assignment" x="-110" y="68">x = 0,
 grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
-		<transition id="id35">
+		<transition id="id40">
 			<source ref="id20"/>
 			<target ref="id23"/>
-			<label kind="guard" x="238" y="-34">x&gt;= waiting_helping</label>
+			<label kind="guard" x="246" y="-34">x&gt;= waiting_helping</label>
 			<label kind="synchronisation" x="246" y="0">assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
 			<label kind="assignment" x="246" y="-17">x=0</label>
 		</transition>
-		<transition id="id36">
+		<transition id="id41">
 			<source ref="id18"/>
 			<target ref="id16"/>
 			<label kind="assignment" x="-323" y="-178">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
-		<transition id="id37">
+		<transition id="id42">
 			<source ref="id17"/>
 			<target ref="id19"/>
 			<label kind="synchronisation" x="-884" y="59">assistDone[id]?</label>
@@ -919,40 +934,40 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="-926" y="102"/>
 			<nail x="-391" y="102"/>
 		</transition>
-		<transition id="id38">
+		<transition id="id43">
 			<source ref="id17"/>
 			<target ref="id22"/>
 			<label kind="guard" x="-918" y="-195">x &gt; Tv</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
-		<transition id="id39">
+		<transition id="id44">
 			<source ref="id18"/>
 			<target ref="id21"/>
 			<label kind="synchronisation" x="59" y="-493">callFirstResponder[id]?</label>
-			<label kind="assignment" x="76" y="-510">x:=0, set_waitingfr()</label>
+			<label kind="assignment" x="-42" y="-459">x:=0, set_waitingfr(), grid[pos[id].y][pos[id].x] = BUSY_SURVIVOR</label>
 			<nail x="-93" y="-467"/>
 		</transition>
-		<transition id="id40">
+		<transition id="id45">
 			<source ref="id18"/>
 			<target ref="id20"/>
-			<label kind="synchronisation" x="17" y="-93">assist[id]?</label>
-			<label kind="assignment" x="0" y="-110">x=0, set_waiting()</label>
+			<label kind="synchronisation" x="17" y="-51">assist[id]?</label>
+			<label kind="assignment" x="0" y="-68">x=0, set_waiting()</label>
 		</transition>
-		<transition id="id41">
+		<transition id="id46">
 			<source ref="id16"/>
 			<target ref="id19"/>
 			<label kind="guard" x="-578" y="34">isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-586" y="51">grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="-433" y="34"/>
 		</transition>
-		<transition id="id42">
+		<transition id="id47">
 			<source ref="id16"/>
 			<target ref="id18"/>
 			<label kind="guard" x="-450" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
 !isExitNear(pos[id].x, pos[id].y)</label>
 		</transition>
-		<transition id="id43">
+		<transition id="id48">
 			<source ref="id16"/>
 			<target ref="id17"/>
 			<label kind="guard" x="-841" y="-110">isFireNear(pos[id].x, pos[id].y) &amp;&amp;
@@ -1090,73 +1105,73 @@ return false;
 
 
 </declaration>
-		<location id="id44" x="-526" y="-8">
+		<location id="id49" x="-526" y="-8">
 			<name x="-560" y="-42">Initializer</name>
 			<urgent/>
 		</location>
-		<location id="id45" x="348" y="144">
+		<location id="id50" x="348" y="144">
 			<name x="297" y="102">Instruct_Zero_Responder</name>
 		</location>
-		<location id="id46" x="170" y="-8">
+		<location id="id51" x="170" y="-8">
 			<name x="51" y="-51">Search_closest_responder</name>
 		</location>
-		<location id="id47" x="357" y="-153">
+		<location id="id52" x="357" y="-153">
 			<name x="289" y="-187">Instruct_ZeroFirst_Responder</name>
 		</location>
-		<location id="id48" x="-110" y="-8">
+		<location id="id53" x="-110" y="-8">
 		</location>
-		<location id="id49" x="-399" y="-8">
+		<location id="id54" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id50" x="-399" y="195">
+		<location id="id55" x="-399" y="195">
 		</location>
-		<init ref="id44"/>
-		<transition id="id51">
-			<source ref="id50"/>
-			<target ref="id49"/>
+		<init ref="id49"/>
+		<transition id="id56">
+			<source ref="id55"/>
+			<target ref="id54"/>
 			<label kind="assignment" x="-323" y="76">checkPNANearby(id)</label>
 			<nail x="-331" y="119"/>
 			<nail x="-331" y="76"/>
 		</transition>
-		<transition id="id52">
-			<source ref="id48"/>
-			<target ref="id49"/>
+		<transition id="id57">
+			<source ref="id53"/>
+			<target ref="id54"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby(id)</label>
 			<label kind="assignment" x="-331" y="-195">resetPNACoords()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
-		<transition id="id53">
-			<source ref="id49"/>
-			<target ref="id50"/>
+		<transition id="id58">
+			<source ref="id54"/>
+			<target ref="id55"/>
 			<label kind="guard" x="-595" y="102">!isPNANearby</label>
 			<label kind="assignment" x="-586" y="85">dronePatrol(id)</label>
 			<nail x="-476" y="76"/>
 			<nail x="-476" y="119"/>
 		</transition>
-		<transition id="id54">
-			<source ref="id49"/>
-			<target ref="id48"/>
+		<transition id="id59">
+			<source ref="id54"/>
+			<target ref="id53"/>
 			<label kind="guard" x="-331" y="-34">isPNANearby(id)</label>
 		</transition>
-		<transition id="id55">
-			<source ref="id48"/>
-			<target ref="id46"/>
+		<transition id="id60">
+			<source ref="id53"/>
+			<target ref="id51"/>
 			<label kind="guard" x="-51" y="17">isSurvNearby(id)</label>
 		</transition>
-		<transition id="id56">
-			<source ref="id44"/>
-			<target ref="id49"/>
+		<transition id="id61">
+			<source ref="id49"/>
+			<target ref="id54"/>
 		</transition>
-		<transition id="id57">
-			<source ref="id46"/>
-			<target ref="id45"/>
+		<transition id="id62">
+			<source ref="id51"/>
+			<target ref="id50"/>
 			<label kind="guard" x="153" y="119">!isFRNearby(id)</label>
 			<label kind="synchronisation" x="178" y="93">assist[id]!</label>
 		</transition>
-		<transition id="id58">
-			<source ref="id46"/>
-			<target ref="id47"/>
+		<transition id="id63">
+			<source ref="id51"/>
+			<target ref="id52"/>
 			<label kind="guard" x="144" y="-145">isFRNearby(id)</label>
 			<label kind="synchronisation" x="102" y="-170">callFirstResponder[id]!</label>
 		</transition>
