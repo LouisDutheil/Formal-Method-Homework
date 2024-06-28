@@ -44,9 +44,9 @@ pos_t posDrone[N_DRONES];
 //todo remove int xNeed[GRID_H][GRID_W];   // X coordinate for need requests, xNeed[1][2] set to 5 indicates that the civilian found at coordinates (y=1,x=2) is in charge of saving the person in need found at x = 5  
 //todo remove int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = value
 
-int helping[N_CIVILIANS][2]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
-int calling[N_CIVILIANS][2]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
-
+pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
+pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
+pos_t FRHelping[N_FR];      // same principles for first responders  
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -159,10 +159,10 @@ int abs_(int x) {
  * @param y The y-coordinate.
  * @return id of the specific entity.
  */
-int getIdFromPos_Civilian(int x,int y){
+int getIdFromPos_Civilian(pos_t posCiv){
    int i;
    for(i=0;i&lt;N_CIVILIANS;i++){
-       if(pos[i].x== x &amp;&amp; pos[i].y== y){
+       if(pos[i].x== posCiv.x &amp;&amp; pos[i].y== posCiv.y){
          return i;
         }    
     }
@@ -176,10 +176,10 @@ int getIdFromPos_Civilian(int x,int y){
  * @param y The y-coordinate.
  * @return id of the specific entity.
  */
-int getIdFromPos_FirstResponder(int x,int y){
+int getIdFromPos_FirstResponder(pos_t posFR){
     int i;
     for(i=N_CIVILIANS;i&lt;N_CIVILIANS+N_FR;i++){
-       if(pos[i].x== x &amp;&amp; pos[i].y== y){
+       if(pos[i].x== posFR.x &amp;&amp; pos[i].y== posFR.y){
          return i;
         }    
     }
@@ -287,9 +287,9 @@ void saveId_rescuing(int x, int y){
     for (i = 0; i &lt; 4; i++) {
         int nx = x + DX[i];
         int ny = y + DY[i];
-
+        pos_t newPos = {nx, ny};
         if (isValid(nx, ny) &amp;&amp; grid[ny][nx] == NEED) {
-            id_rescuing = getIdFromPos_Civilian(nx,ny);
+            id_rescuing = getIdFromPos_Civilian(newPos);
         }
     }
 }
@@ -474,7 +474,7 @@ void set_waiting(int x,int y){
 		<transition id="id8">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="42" y="110">dead[getIdFromPos_Civilian(helping[zr_tocommto][0],helping[zr_tocommto][1])]?</label>
+			<label kind="synchronisation" x="42" y="110">dead[getIdFromPos_Civilian(helping[zr_tocommto])]?</label>
 			<nail x="289" y="102"/>
 			<nail x="93" y="102"/>
 		</transition>
@@ -835,21 +835,21 @@ void set_waitingfr(){
 		<transition id="id27">
 			<source ref="id24"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="127" y="-306">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<label kind="synchronisation" x="127" y="-306">dead[getIdFromPos_Civilian(helping[id])]?</label>
 			<nail x="612" y="-314"/>
 			<nail x="68" y="-314"/>
 		</transition>
 		<transition id="id28">
 			<source ref="id21"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="144" y="-382">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<label kind="synchronisation" x="144" y="-382">dead[getIdFromPos_Civilian(helping[id])]?</label>
 			<nail x="629" y="-357"/>
 			<nail x="59" y="-357"/>
 		</transition>
 		<transition id="id29">
 			<source ref="id20"/>
 			<target ref="id18"/>
-			<label kind="synchronisation" x="-59" y="-212">dead[getIdFromPos_Civilian(helping[id][0],helping[id][1])]?</label>
+			<label kind="synchronisation" x="-59" y="-212">dead[getIdFromPos_Civilian(helping[id])]?</label>
 			<nail x="76" y="-187"/>
 		</transition>
 		<transition id="id30">
@@ -878,7 +878,7 @@ notifies everyone about the death</label>
 			<source ref="id24"/>
 			<target ref="id25"/>
 			<label kind="guard" x="867" y="-51">x&gt;=waiting_helping</label>
-			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id][0],calling[id][1])-N_CIVILIANS]!;
+			<label kind="synchronisation" x="867" y="-17">assist_fromZR[getIdFromPos_FirstResponder(calling[id][0],calling[id][1])-N_CIVILIANS]!
 assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
 			<label kind="assignment" x="867" y="-34">x=0</label>
 			<label kind="comments" x="884" y="34">doesn't work with 2 channels contemporary on the same edge</label>
@@ -900,7 +900,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id20"/>
 			<target ref="id23"/>
 			<label kind="guard" x="238" y="-34">x&gt;= waiting_helping</label>
-			<label kind="synchronisation" x="246" y="0">assistDone[getIdFromPos_Civilian(helping[id][0],helping[id][1])]!</label>
+			<label kind="synchronisation" x="246" y="0">assistDone[getIdFromPos_Civilian(helping[id])]!</label>
 			<label kind="assignment" x="246" y="-17">x=0</label>
 		</transition>
 		<transition id="id36">
@@ -965,11 +965,11 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<name x="5" y="5">Drone</name>
 		<parameter>int id</parameter>
 		<declaration>// Place local declarations here.
-int patrolStep = 0;
-int droneX = 1, droneY = 1;    //need to find a way to instantiate these variables when the entities are placed on the grid
 bool isMovingRight;
-int distZR, distFR, nPNADetected, nSurvivorDetected;
-pos_t PNACoords;
+int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
+const pos_t  DEF_POS = {-1, -1};
+pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
+
 
 
 /**
@@ -1007,7 +1007,7 @@ void dronePatrol(int id) {
     }
 }
 
-void checkPNANearby(int id){
+void checkSurroundings(int id){
     int dx,dy;
     int nx,ny;
     // Check the eight neighboring cells around the drone position
@@ -1021,71 +1021,71 @@ void checkPNANearby(int id){
             ny = posDrone[id].y + dy;
             // Check if the neighboring cell is within the grid bounds
             if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
-                if (grid[ny][nx] == NEED){
-                    pos_t newCoords = {nx, ny};
-                    PNACoords = newCoords;
+                pos_t newPos = {nx, ny};
+                if (cell(newPos) == NEED){
+                    posPNA = newPos;
+                }
+                else if(cell(newPos) == SURVIVOR){
+                    posSurv = newPos;
+                    idSurv = getIdFromPos_Civilian(posSurv);
+                }
+                else if (cell(newPos) == FIRSTRESPONDER){
+                    posFR = newPos;
+                    idFR = getIdFromPos_FirstResponder(posSurv);
                 }
             }
         }
     }
 }
-bool isPNANearby(int id){
-    if (PNACoords.x == -1 &amp;&amp; PNACoords.y ==-1)
+bool isPNANearby(){
+    if (posPNA.x == -1 &amp;&amp; posPNA.y ==-1)
         return false;
 return true;
 }
 
-void resetPNACoords(){
-    pos_t dfltCoords = {-1, -1};
-    PNACoords = dfltCoords;
+void resetPos(){
+    
+    posPNA = DEF_POS;
+    posSurv = DEF_POS;
+    posFR = DEF_POS;
+    idFR = -1;
+    idSurv = -1;
 }
-bool isSurvNearby(int id){
-    int dx,dy;
-    int nx,ny;
-    // Check the eight neighboring cells around the drone position
-    for (dx = -1; dx &lt;= 1; dx++) {
-        for (dy = -1; dy &lt;= 1; dy++) {
-            // Skip the current cell (the drone's position)
-            if (dx == 0 &amp;&amp; dy == 0) {
-                //TODO CHECK THAT
-            }
-            nx = posDrone[id].x + dx;
-            ny = posDrone[id].y + dy;
-            // Check if the neighboring cell is within the grid bounds
-            if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
-                if (grid[ny][nx] == SURVIVOR){
-                    
-                    return true;
-                }
-            }
-        }
-    }
-return false;    
+bool isSurvNearby(){
+    if (posSurv.x == -1 &amp;&amp; posSurv.y ==-1)
+        return false;
+return true;
 }
 
-bool isFRNearby(int id){
-    int dx,dy;
-    int nx,ny;
-    // Check the eight neighboring cells around the drone position
-    for (dx = -1; dx &lt;= 1; dx++) {
-        for (dy = -1; dy &lt;= 1; dy++) {
-            // Skip the current cell (the drone's position)
-            if (dx == 0 &amp;&amp; dy == 0) {
-                //TODO CHECK THAT
-            }
-            nx = posDrone[id].x + dx;
-            ny = posDrone[id].y + dy;
-            // Check if the neighboring cell is within the grid bounds
-            if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
-                if (grid[ny][nx] == FIRSTRESPONDER){
-                    
-                    return true;
-                }
-            }
-        }
-        
-    }
-return false; 
+bool isFRNearby(){
+    if (posFR.x == -1 &amp;&amp; posFR.y ==-1)
+        return false;
+return true;
+}
+
+
+//Checks in the calling and helping table if the survivor detected by the drone is available or already busy
+bool isSurvAvailable(){
+    int id = getIdFromPos_Civilian(posSurv);
+    if(calling[id] == DEF_POS &amp;&amp; helping[id] == DEF_POS)
+        return true;
+    else
+        return false; 
+}
+
+bool isFRAvailable(){
+    int id = getIdFromPos_FirstResponder(posFR);
+    if(FRHelping[id] == DEF_POS)
+        return true;
+    else
+        return false;
+}
+
+
+void putSurvBusy(){
+    int id = getIdFromPos_Civilian(posSurv);
+    calling[id] = posPNA;
+    
 }
 
 
@@ -1095,70 +1095,87 @@ return false;
 			<urgent/>
 		</location>
 		<location id="id45" x="348" y="144">
-			<name x="297" y="102">Instruct_Zero_Responder</name>
+			<name x="365" y="136">Instruct_Zero_Responder</name>
 		</location>
 		<location id="id46" x="170" y="-8">
-			<name x="51" y="-51">Search_closest_responder</name>
+			<name x="195" y="-17">Search_closest_responder</name>
 		</location>
 		<location id="id47" x="357" y="-153">
-			<name x="289" y="-187">Instruct_ZeroFirst_Responder</name>
+			<name x="382" y="-161">Instruct_ZeroFirst_Responder</name>
 		</location>
 		<location id="id48" x="-110" y="-8">
+			<name x="-161" y="17">PNA_Detected</name>
 		</location>
 		<location id="id49" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id50" x="-399" y="195">
+		<location id="id50" x="-612" y="161">
 		</location>
 		<init ref="id44"/>
 		<transition id="id51">
-			<source ref="id50"/>
+			<source ref="id45"/>
 			<target ref="id49"/>
-			<label kind="assignment" x="-323" y="76">checkPNANearby(id)</label>
-			<nail x="-331" y="119"/>
-			<nail x="-331" y="76"/>
+			<label kind="assignment" x="-102" y="246">resetPos()</label>
+			<nail x="229" y="280"/>
+			<nail x="-255" y="280"/>
+			<nail x="-408" y="136"/>
 		</transition>
 		<transition id="id52">
-			<source ref="id48"/>
+			<source ref="id47"/>
 			<target ref="id49"/>
-			<label kind="guard" x="-348" y="-170">!isSurvNearby(id)</label>
-			<label kind="assignment" x="-331" y="-195">resetPNACoords()</label>
-			<nail x="-272" y="-144"/>
+			<label kind="assignment" x="-85" y="-280">resetPos()</label>
+			<nail x="229" y="-297"/>
+			<nail x="-255" y="-297"/>
+			<nail x="-399" y="-161"/>
 		</transition>
 		<transition id="id53">
-			<source ref="id49"/>
-			<target ref="id50"/>
-			<label kind="guard" x="-595" y="102">!isPNANearby</label>
-			<label kind="assignment" x="-586" y="85">dronePatrol(id)</label>
-			<nail x="-476" y="76"/>
-			<nail x="-476" y="119"/>
+			<source ref="id50"/>
+			<target ref="id49"/>
+			<label kind="assignment" x="-586" y="161">checkSurroundings(id)</label>
+			<nail x="-510" y="144"/>
+			<nail x="-467" y="102"/>
 		</transition>
 		<transition id="id54">
-			<source ref="id49"/>
-			<target ref="id48"/>
-			<label kind="guard" x="-331" y="-34">isPNANearby(id)</label>
+			<source ref="id48"/>
+			<target ref="id49"/>
+			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
+			<label kind="assignment" x="-331" y="-195">resetPos()</label>
+			<nail x="-272" y="-144"/>
 		</transition>
 		<transition id="id55">
-			<source ref="id48"/>
-			<target ref="id46"/>
-			<label kind="guard" x="-51" y="17">isSurvNearby(id)</label>
+			<source ref="id49"/>
+			<target ref="id50"/>
+			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
+			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
+			<nail x="-527" y="34"/>
+			<nail x="-586" y="68"/>
 		</transition>
 		<transition id="id56">
+			<source ref="id49"/>
+			<target ref="id48"/>
+			<label kind="guard" x="-331" y="-42">isPNANearby()</label>
+		</transition>
+		<transition id="id57">
+			<source ref="id48"/>
+			<target ref="id46"/>
+			<label kind="guard" x="-110" y="-42">isSurvNearby() &amp;&amp; isSurvAvailable()</label>
+		</transition>
+		<transition id="id58">
 			<source ref="id44"/>
 			<target ref="id49"/>
 		</transition>
-		<transition id="id57">
+		<transition id="id59">
 			<source ref="id46"/>
 			<target ref="id45"/>
-			<label kind="guard" x="153" y="119">!isFRNearby(id)</label>
-			<label kind="synchronisation" x="178" y="93">assist[id]!</label>
+			<label kind="guard" x="8" y="110">!isFRNearby() || !isFRAvailable()</label>
+			<label kind="synchronisation" x="93" y="93">assist[idSurv]!</label>
 		</transition>
-		<transition id="id58">
+		<transition id="id60">
 			<source ref="id46"/>
 			<target ref="id47"/>
-			<label kind="guard" x="144" y="-145">isFRNearby(id)</label>
-			<label kind="synchronisation" x="102" y="-170">callFirstResponder[id]!</label>
+			<label kind="guard" x="8" y="-153">isFRNearby() &amp;&amp; isFRAvailable()</label>
+			<label kind="synchronisation" x="42" y="-170">callFirstResponder[idSurv]!</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
