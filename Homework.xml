@@ -789,11 +789,16 @@ void setWaitingfr(){
 }
 
 
-
+/**
+ * @brief sets the survivor's calling coordinates to default in the calling table
+ */
 void setSurvFreeCalling(int id){
     calling[id] = DEF_POS;
 }
 
+/**
+ * @brief sets the survivor's helping coordinates to default in the helping table
+ */
 void setSurvFreeHelping(int id){
     helping[id] = DEF_POS;
 }
