@@ -25,10 +25,11 @@ const int N_DRONES = 3; //Total number of drones
 const int N_FR = 3; // Total number of first responders
 const int Tv = 10; //time for the civilian to die close to a fire
 const int Tfr = 10; //time to save a person
+const int Nv = 1; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
 typedef struct { int x, y; } pos_t;
-
+const pos_t  DEF_POS = {-1, -1};
 /*********GLOBAL SYSTEM PARAMETERS ****************/
 
 
@@ -789,6 +790,18 @@ void setWaitingfr(){
 
 
 
+void setSurvFreeCalling(int id){
+    calling[id] = DEF_POS;
+}
+
+void setSurvFreeHelping(int id){
+    helping[id] = DEF_POS;
+}
+
+
+
+
+
 </declaration>
 		<location id="id16" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
@@ -811,8 +824,8 @@ void setWaitingfr(){
 		<location id="id21" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
-		<location id="id22" x="238" y="127">
-			<label kind="invariant" x="255" y="118">x &lt;= Tzr</label>
+		<location id="id22" x="238" y="110">
+			<label kind="invariant" x="255" y="101">x &lt;= Tzr</label>
 		</location>
 		<location id="id23" x="-501" y="-161">
 			<name x="-511" y="-195">Initializer</name>
@@ -853,6 +866,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id20"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="102" y="-161">dead[getIdFromPosCivilian(helping[id])]?</label>
+			<label kind="assignment" x="255" y="-144">setSurvFreeHelping(id)</label>
 			<nail x="238" y="-153"/>
 		</transition>
 		<transition id="id32">
@@ -916,7 +930,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id18"/>
 			<target ref="id20"/>
 			<label kind="synchronisation" x="17" y="-93">assist[id]?</label>
-			<label kind="assignment" x="0" y="-110">x=0, setWaiting()</label>
+			<label kind="assignment" x="-17" y="-136">x=0, setWaiting()</label>
 		</transition>
 		<transition id="id41">
 			<source ref="id16"/>
@@ -957,12 +971,14 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id27"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="288" y="-254">dead[getIdFromPosCivilian(helping[id])]?</label>
+			<label kind="assignment" x="374" y="-229">setSurvFreeCalling(id)</label>
 			<nail x="705" y="-254"/>
 		</transition>
 		<transition id="id47">
 			<source ref="id26"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="229" y="-398">dead[getIdFromPosCivilian(helping[id])]?</label>
+			<label kind="assignment" x="357" y="-416">setSurvFreeCalling(id)</label>
 			<nail x="739" y="-373"/>
 			<nail x="365" y="-373"/>
 		</transition>
@@ -979,7 +995,6 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<declaration>// Place local declarations here.
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
-const pos_t  DEF_POS = {-1, -1};
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
 
 
@@ -1019,67 +1034,102 @@ void dronePatrol(int id) {
     }
 }
 
-void checkSurroundings(int id){
-    int dx,dy;
-    int nx,ny;
-    // Check the eight neighboring cells around the drone position
-    for (dx = -1; dx &lt;= 1; dx++) {
-        for (dy = -1; dy &lt;= 1; dy++) {
-            // Skip the current cell (the drone's position)
+/**
+ * @brief Check all cells within the Manhattan distance Nv from the drone position and registers infos of the surroundings
+ * 
+ *
+ * @param id the drone id 
+ */
+    // 
+void checkSurroundings(int id) {
+    int dx, dy;
+    int nx, ny;
+    for (dx = -Nv; dx &lt;= Nv; dx++) {
+        for (dy = -Nv; dy &lt;= Nv; dy++) {
+            if (abs(dx) + abs(dy) &gt; Nv) {
+                return;
+            }
             if (dx == 0 &amp;&amp; dy == 0) {
-                //TODO CHECK THAT
+                return;
             }
             nx = posDrone[id].x + dx;
             ny = posDrone[id].y + dy;
-            // Check if the neighboring cell is within the grid bounds
             if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
                 pos_t newPos = {nx, ny};
-                if (cell(newPos) == NEED){
+                if (cell(newPos) == NEED) {
                     posPNA = newPos;
-                }
-                else if(cell(newPos) == SURVIVOR){
+                } else if (cell(newPos) == SURVIVOR) {
                     posSurv = newPos;
                     idSurv = getIdFromPosCivilian(posSurv);
-                }
-                else if (cell(newPos) == FIRST_RESPONDER){
+                } else if (cell(newPos) == FIRST_RESPONDER) {
                     posFR = newPos;
-                    idFR = getIdFromPosFirstResponder(posSurv);
+                    idFR = getIdFromPosFirstResponder(posFR); 
                 }
             }
         }
     }
 }
 
-//Functions used to check if a PNA/Survivor/First_responder has been detected during the surrouding check using the variables pos of each entity
+/**
+ * @brief Check if a PNA has been detected during the surrouding check using the registered variables pos of each entity
+ * 
+ *
+ * @return bool confirming or not the presence of a PNA
+ */
 bool isPNANearby(){
     if (posPNA == DEF_POS)
         return false;
 return true;
 }
 
+/**
+ * @brief Check if a Survivor has been detected during the surrouding check using the registered variables pos of each entity
+ * 
+ *
+ * @return bool confirming or not the presence of a Survivor
+ */
 bool isSurvNearby(){
     if (posSurv == DEF_POS)
         return false;
 return true;
 }
 
+/**
+ * @brief Check if a First Responder has been detected during the surrouding check using the registered variables pos of each entity
+ * 
+ *
+ * @return bool confirming or not the presence of a First Responder
+ */
 bool isFRNearby(){
     if (posFR == DEF_POS)
         return false;
 return true;
 }
 
-//Function that resets all the data taken from the previous surrounding check in order to be ready for the next one
-void resetPos(){
+/**
+ * @brief Register the survivor as busy in the calling table
+ * 
+ */
+void setSurvBusyCalling(){
+    calling[idSurv] = posPNA;
     
-    posPNA = DEF_POS;
-    posSurv = DEF_POS;
-    posFR = DEF_POS;
-    idFR = -1;
-    idSurv = -1;
 }
 
-//Checks in the calling and helping table if the survivor detected by the drone is available or already busy
+/**
+ * @brief Register the survivor as busy in the helping table
+ * 
+ */
+void setSurvBusyHelping(){
+    helping[idSurv] = posPNA;
+    
+}
+
+/**
+ * @brief Check if the detected survivor is available 
+ * 
+ *
+ * @return bool confirming or not the availability of the survivor 
+ */
 bool isSurvAvailable(){
     if(calling[idSurv] != DEF_POS || helping[idSurv] != DEF_POS)
         return false;
@@ -1087,6 +1137,12 @@ bool isSurvAvailable(){
         return true; 
 }
 
+/**
+ * @brief Check if the detected First Responder is available 
+ * 
+ *
+ * @return bool confirming or not the availability of the First Responder 
+ */
 bool isFRAvailable(){;
     if(FRHelping[idFR] == DEF_POS)
         return true;
@@ -1094,10 +1150,17 @@ bool isFRAvailable(){;
         return false;
 }
 
-
-void putSurvBusy(){
-    calling[idSurv] = posPNA;
+/**
+ * @brief Resets all the data (pos and booleans) taken from the previous surrounding check in order to be ready for the next one
+ * 
+ */
+void resetData(){
     
+    posPNA = DEF_POS;
+    posSurv = DEF_POS;
+    posFR = DEF_POS;
+    idFR = -1;
+    idSurv = -1;
 }
 
 
@@ -1128,7 +1191,7 @@ void putSurvBusy(){
 		<transition id="id56">
 			<source ref="id50"/>
 			<target ref="id54"/>
-			<label kind="assignment" x="-102" y="246">resetPos()</label>
+			<label kind="assignment" x="-102" y="246">resetData()</label>
 			<nail x="229" y="280"/>
 			<nail x="-255" y="280"/>
 			<nail x="-408" y="136"/>
@@ -1136,7 +1199,7 @@ void putSurvBusy(){
 		<transition id="id57">
 			<source ref="id52"/>
 			<target ref="id54"/>
-			<label kind="assignment" x="-85" y="-280">resetPos()</label>
+			<label kind="assignment" x="-85" y="-280">resetData()</label>
 			<nail x="229" y="-297"/>
 			<nail x="-255" y="-297"/>
 			<nail x="-399" y="-161"/>
@@ -1152,7 +1215,7 @@ void putSurvBusy(){
 			<source ref="id53"/>
 			<target ref="id54"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
-			<label kind="assignment" x="-331" y="-195">resetPos()</label>
+			<label kind="assignment" x="-331" y="-195">resetData()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
 		<transition id="id60">
@@ -1182,12 +1245,14 @@ void putSurvBusy(){
 			<target ref="id50"/>
 			<label kind="guard" x="8" y="110">!isFRNearby() || !isFRAvailable()</label>
 			<label kind="synchronisation" x="93" y="93">assist[idSurv]!</label>
+			<label kind="assignment" x="76" y="127">setSurvBusyHelping()</label>
 		</transition>
 		<transition id="id65">
 			<source ref="id51"/>
 			<target ref="id52"/>
 			<label kind="guard" x="8" y="-153">isFRNearby() &amp;&amp; isFRAvailable()</label>
 			<label kind="synchronisation" x="42" y="-170">callFIRST_RESPONDER[idSurv]!</label>
+			<label kind="assignment" x="68" y="-136">setSurvBusyCalling()</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
