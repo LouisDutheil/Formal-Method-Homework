@@ -1068,7 +1068,7 @@ void checkSurroundings(int id) {
                 pos_t newPos = {nx, ny};
                 if (cell(newPos) == NEED) { //todo this does not prevent the drone to inform another zero responder even if this person is currently being saved by another entity
                     posPNA = newPos;
-                } else if (cell(newPos) == SURVIVOR) {
+                } else if (cell(newPos) == SURVIVOR) { //todo this takes only the last survivor, he might be busy and prevent the drone to call an available survivor
                     posSurv = newPos;
                     idSurv = getIdFromPosCivilian(posSurv);
                 } else if (cell(newPos) == FIRST_RESPONDER) {
