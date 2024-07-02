@@ -1001,7 +1001,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-
+bool droneInit = true;
 
 
 /**
@@ -1013,10 +1013,13 @@ pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
  */
 
 void dronePatrol(int id) {
-    if (posDrone[id].x &lt;= GRID_W/2)
-        isMovingRight = true;
-    else
-        isMovingRight = false;
+    if (droneInit){
+        if (posDrone[id].x &lt;= GRID_W/2)
+            isMovingRight = true;
+        else
+            isMovingRight = false;
+        droneInit = false;
+    }
     // Check current direction and move accordingly
     if (isMovingRight) {
         // Move right
