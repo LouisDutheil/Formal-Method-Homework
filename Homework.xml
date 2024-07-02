@@ -857,7 +857,7 @@ void setSurvFreeHelping(int id){
 		<transition id="id29">
 			<source ref="id28"/>
 			<target ref="id18"/>
-			<label kind="assignment" x="-51" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
+			<label kind="assignment" x="-59" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 			<nail x="0" y="-255"/>
 		</transition>
 		<transition id="id30">
@@ -935,7 +935,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id18"/>
 			<target ref="id20"/>
 			<label kind="synchronisation" x="17" y="-93">assist[id]?</label>
-			<label kind="assignment" x="-17" y="-136">x=0, setWaiting()</label>
+			<label kind="assignment" x="-8" y="-110">x=0, setWaiting()</label>
 		</transition>
 		<transition id="id41">
 			<source ref="id16"/>
@@ -997,11 +997,16 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	<template>
 		<name x="5" y="5">Drone</name>
 		<parameter>int id</parameter>
-		<declaration>// Place local declarations here.
+		<declaration>
+/*
+    Acronyms:
+    PNA =&gt; person in need of assistance
+*/
+
+// Place local declarations here.
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-bool droneInit = true;
 
 
 /**
@@ -1013,13 +1018,10 @@ bool droneInit = true;
  */
 
 void dronePatrol(int id) {
-    if (droneInit){
-        if (posDrone[id].x &lt;= GRID_W/2)
-            isMovingRight = true;
-        else
-            isMovingRight = false;
-        droneInit = false;
-    }
+    if (posDrone[id].x &lt;= GRID_W/2)
+        isMovingRight = true;
+    else
+        isMovingRight = false;
     // Check current direction and move accordingly
     if (isMovingRight) {
         // Move right
@@ -1051,7 +1053,7 @@ void dronePatrol(int id) {
     // 
 void checkSurroundings(int id) {
     int dx, dy;
-    int nx, ny;
+    int nx, ny; //new x and new y
     for (dx = -Nv; dx &lt;= Nv; dx++) {
         for (dy = -Nv; dy &lt;= Nv; dy++) {
             if (abs(dx) + abs(dy) &gt; Nv) {
@@ -1064,7 +1066,7 @@ void checkSurroundings(int id) {
             ny = posDrone[id].y + dy;
             if (nx &gt;= 0 &amp;&amp; nx &lt; GRID_W &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; GRID_H) {
                 pos_t newPos = {nx, ny};
-                if (cell(newPos) == NEED) {
+                if (cell(newPos) == NEED) { //todo this does not prevent the drone to inform another zero responder even if this person is currently being saved by another entity
                     posPNA = newPos;
                 } else if (cell(newPos) == SURVIVOR) {
                     posSurv = newPos;
@@ -1097,7 +1099,7 @@ return true;
  * @return bool confirming or not the presence of a Survivor
  */
 bool isSurvNearby(){
-    if (posSurv == DEF_POS)
+    if (posSurv == DEF_POS) 
         return false;
 return true;
 }
@@ -1223,7 +1225,7 @@ void resetData(){
 			<source ref="id53"/>
 			<target ref="id54"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
-			<label kind="assignment" x="-331" y="-195">resetData()</label>
+			<label kind="assignment" x="-331" y="-187">resetData()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
 		<transition id="id60">
