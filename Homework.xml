@@ -194,7 +194,7 @@ int getIdFromPosFirstResponder(pos_t posFR){
 		<name>Initializer</name>
 		<location id="id0" x="0" y="0">
 			<name x="-10" y="-34">Initial</name>
-			<urgent/>
+			<committed/>
 		</location>
 		<location id="id1" x="0" y="119">
 		</location>
@@ -472,7 +472,6 @@ void setFRFree(int id){
 		</location>
 		<location id="id7" x="229" y="-93">
 			<name x="219" y="-127">Initializer</name>
-			<urgent/>
 		</location>
 		<init ref="id7"/>
 		<transition id="id8">
@@ -622,7 +621,7 @@ bool isFirstResponderNear(int id) {
  *
  * @param id The identifier of the civilian to be moved.
  */
-void move(int id) {
+void move(int id) { //todo improve this by making the civilian walk along the edge of the grid
     // Current position of the civilian
     int current_x = pos[id].x;
     int current_y = pos[id].y;
@@ -835,7 +834,6 @@ void setSurvFree(int id){
 		</location>
 		<location id="id23" x="-501" y="-161">
 			<name x="-511" y="-195">Initializer</name>
-			<urgent/>
 		</location>
 		<location id="id24" x="858" y="272">
 			<name x="866" y="239">ReachedNeed</name>
@@ -858,7 +856,7 @@ void setSurvFree(int id){
 		<transition id="id29">
 			<source ref="id28"/>
 			<target ref="id18"/>
-			<label kind="assignment" x="-51" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
+			<label kind="assignment" x="-59" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 			<nail x="0" y="-255"/>
 		</transition>
 		<transition id="id30">
@@ -898,9 +896,9 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id35">
 			<source ref="id20"/>
 			<target ref="id22"/>
-			<label kind="guard" x="238" y="-34">x&gt;= waitingHelping</label>
-			<label kind="synchronisation" x="246" y="0">assistDone[getIdFromPosCivilian(helping[id])]!</label>
-			<label kind="assignment" x="246" y="-17">x=0</label>
+			<label kind="guard" x="246" y="-8">x&gt;= waitingHelping</label>
+			<label kind="synchronisation" x="246" y="26">assistDone[getIdFromPosCivilian(helping[id])]!</label>
+			<label kind="assignment" x="246" y="9">x=0</label>
 		</transition>
 		<transition id="id36">
 			<source ref="id18"/>
@@ -912,11 +910,10 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id37">
 			<source ref="id17"/>
 			<target ref="id19"/>
-			<label kind="synchronisation" x="-884" y="59">assistDone[id]?</label>
-			<label kind="assignment" x="-884" y="76">grid[pos[id].y][pos[id].x] = EMPTY</label>
-			<label kind="comments" x="-790" y="111">when helped and time for helping finishes</label>
-			<nail x="-926" y="102"/>
-			<nail x="-391" y="102"/>
+			<label kind="synchronisation" x="-884" y="67">assistDone[id]?</label>
+			<label kind="assignment" x="-884" y="84">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="comments" x="-790" y="119">when helped and time for helping finishes</label>
+			<nail x="-926" y="110"/>
 		</transition>
 		<transition id="id38">
 			<source ref="id17"/>
@@ -936,7 +933,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id18"/>
 			<target ref="id20"/>
 			<label kind="synchronisation" x="17" y="-93">assist[id]?</label>
-			<label kind="assignment" x="-17" y="-136">x=0, setWaiting()</label>
+			<label kind="assignment" x="-8" y="-110">x=0, setWaiting()</label>
 		</transition>
 		<transition id="id41">
 			<source ref="id16"/>
@@ -998,11 +995,16 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	<template>
 		<name x="5" y="5">Drone</name>
 		<parameter>int id</parameter>
-		<declaration>// Place local declarations here.
+		<declaration>
+/*
+    Acronyms:
+    PNA =&gt; person in need of assistance
+*/
+
+// Place local declarations here.
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-bool droneInit = true;
 
 
 /**
@@ -1014,13 +1016,10 @@ bool droneInit = true;
  */
 
 void dronePatrol(int id) {
-    if (droneInit){
-        if (posDrone[id].x &lt;= GRID_W/2)
-            isMovingRight = true;
-        else
-            isMovingRight = false;
-        droneInit = false;
-    }
+    if (posDrone[id].x &lt;= GRID_W/2)
+        isMovingRight = true;
+    else
+        isMovingRight = false;
     // Check current direction and move accordingly
     if (isMovingRight) {
         // Move right
@@ -1099,7 +1098,7 @@ bool isPNABeingHelped(pos_t posPNA){
     // 
 void checkSurroundings(int id) {
     int dx, dy;
-    int nx, ny;
+    int nx, ny; //new x and new y
     for (dx = -Nv; dx &lt;= Nv; dx++) {
         for (dy = -Nv; dy &lt;= Nv; dy++) {
             
@@ -1146,7 +1145,7 @@ return true;
  * @return bool confirming or not the presence of a Survivor
  */
 bool isSurvNearby(){
-    if (posSurv == DEF_POS)
+    if (posSurv == DEF_POS) 
         return false;
 return true;
 }
@@ -1206,7 +1205,6 @@ void resetData(){
 </declaration>
 		<location id="id49" x="-526" y="-8">
 			<name x="-560" y="-42">Initializer</name>
-			<urgent/>
 		</location>
 		<location id="id50" x="348" y="144">
 			<name x="365" y="136">Instruct_ZR_Help</name>
@@ -1254,7 +1252,7 @@ void resetData(){
 			<source ref="id53"/>
 			<target ref="id54"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
-			<label kind="assignment" x="-331" y="-195">resetData()</label>
+			<label kind="assignment" x="-331" y="-187">resetData()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
 		<transition id="id60">
