@@ -75,9 +75,9 @@ int cell(pos_t p) {
 }
 
 //Place the entity on the grid and register it in its respective array
-void placeEntity(int id, int X, int Y, int entityType){
-    grid[Y][X] = entityType;
+void placeEntity(int id, int Y, int X, int entityType){
     if (entityType == FIRST_RESPONDER || entityType == CIVILIAN){
+        grid[Y][X] = entityType;
         pos[id].x = X;
         pos[id].y = Y;
     }
@@ -109,22 +109,22 @@ void initializeGrid() {
     //grid[GRID_W][1] = EXIT;
 
     //Place fire 
-    grid[0][5] = FIRE;
-    grid[0][6] = FIRE;
-    grid[1][5] = FIRE;    
+    grid[1][5] = FIRE;
     grid[1][6] = FIRE;
-    grid[2][5] = FIRE;
+    grid[2][5] = FIRE;    
     grid[2][6] = FIRE;
-    grid[2][4] = FIRE;
-    grid[3][4] = FIRE;
     grid[3][5] = FIRE;
+    grid[3][6] = FIRE;
+    grid[3][4] = FIRE;
+    grid[4][4] = FIRE;
+    grid[4][5] = FIRE;
 
     //Place Civilians
-    placeEntity(0, 1, 5, CIVILIAN);
-    placeEntity(1, 3, 6, CIVILIAN);
-    placeEntity(2, 5, 8, CIVILIAN);
-    placeEntity(3, 8, 1, CIVILIAN);
-    placeEntity(4, 6, 3, CIVILIAN);
+    placeEntity(0, 0, 1, CIVILIAN);
+    placeEntity(1, 3, 3, CIVILIAN);
+    placeEntity(2, 4, 6, CIVILIAN);
+    placeEntity(3, 5, 2, CIVILIAN);
+    placeEntity(4, 6, 5, CIVILIAN);
     //command to initialize the civilian automata with its coordinates
 
     //Place First Responders
@@ -137,8 +137,8 @@ void initializeGrid() {
 
     //Place Drones
     placeEntity(0, 1, 0, DRONE);
-    placeEntity(0, 4, 0, DRONE);
-    placeEntity(0, 7, 0, DRONE);
+    placeEntity(1, 4, 0, DRONE);
+    placeEntity(2, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
   
