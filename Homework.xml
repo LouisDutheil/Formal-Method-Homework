@@ -27,6 +27,7 @@ const int Tv = 10; //time for the civilian to die close to a fire
 const int Tfr = 10; //time to save a person
 const int Nv = 1; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
+typedef int[0,N_DRONES-1] id_dr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
 typedef struct { int x, y; } pos_t;
 const pos_t  DEF_POS = {-1, -1};
@@ -71,7 +72,7 @@ broadcast chan dead[N_CIVILIANS];  // each victim use it to advise in case of de
 /*** GLOBAL FUNCTIONS *************************************/
 
 int cell(pos_t p) {
-    return grid[p.x][p.y];
+    return grid[p.y][p.x];
 }
 
 //Place the entity on the grid and register it in its respective array
@@ -96,7 +97,7 @@ void initializeGrid() {
     for (i = 0; i &lt; GRID_W-1; i++) {
         int j;
         for (j = 0; j &lt; GRID_H-1; j++) {
-            grid[i][j] = EMPTY;
+            grid[j][i] = EMPTY;
         }
     }
 
@@ -350,6 +351,7 @@ void move(int id) {
     } else if (direction == 3) {
         // Move right
         new_x = current_x + 1;
+     
     }
 
     // Check if the new position is valid and not near fire
@@ -457,7 +459,6 @@ void setFRFree(int id){
 }</declaration>
 		<location id="id3" x="8" y="0">
 			<name x="-2" y="-34">Initial</name>
-			<urgent/>
 		</location>
 		<location id="id4" x="-416" y="0">
 			<name x="-426" y="-34">Rescue_person</name>
@@ -810,7 +811,6 @@ void setSurvFree(int id){
 </declaration>
 		<location id="id16" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
-			<urgent/>
 		</location>
 		<location id="id17" x="-926" y="-68">
 			<name x="-960" y="-102">InNeed</name>
@@ -824,7 +824,7 @@ void setSurvFree(int id){
 		</location>
 		<location id="id20" x="238" y="-68">
 			<name x="179" y="-102">ZeroResponder</name>
-			<label kind="invariant" x="195" y="-59">x &lt; waitingHelping</label>
+			<label kind="invariant" x="195" y="-59">x &lt;= waitingHelping</label>
 		</location>
 		<location id="id21" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
@@ -839,11 +839,11 @@ void setSurvFree(int id){
 			<name x="866" y="239">ReachedNeed</name>
 		</location>
 		<location id="id25" x="340" y="272">
-			<urgent/>
+			<committed/>
 		</location>
 		<location id="id26" x="858" y="-467">
 			<name x="756" y="-501">CallingFirstResponder</name>
-			<label kind="invariant" x="799" y="-450">x &lt; waitingFR</label>
+			<label kind="invariant" x="799" y="-450">x &lt;= waitingFR</label>
 		</location>
 		<location id="id27" x="858" y="-127">
 			<name x="875" y="-152">ReachedFirstResponder</name>
@@ -994,7 +994,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	</template>
 	<template>
 		<name x="5" y="5">Drone</name>
-		<parameter>int id</parameter>
+		<parameter>const id_dr id</parameter>
 		<declaration>
 /*
     Acronyms:
@@ -1297,7 +1297,7 @@ setFRBusyHelping()</label>
 // List one or more processes to be composed into a system.
 
 // System Declaration
-system Civilian, FirstResponder, Initializer;
+system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
 		<query>
