@@ -20,7 +20,7 @@ const int N = 5;
 
 const int GRID_W = 10; //grid width
 const int GRID_H = 10; //grid height
-const int N_CIVILIANS = 8;  // Total number of civilians
+const int N_CIVILIANS = 9;  // Total number of civilians
 const int N_DRONES = 3; //Total number of drones 
 const int N_FR = 4; // Total number of first responders
 const int Tv = 10; //time for the civilian to die close to a fire
@@ -90,6 +90,21 @@ void placeEntity(int id, int Y, int X, int entityType){
 
 }
 
+void initCallingHelping(){
+    int i;
+    for(i=0;i&lt; N_CIVILIANS ;i++){
+        helping[i]= DEF_POS;
+        calling[i]= DEF_POS;
+    }
+}
+
+void initFRHelping(){
+    int i;
+    for(i=0;i&lt; N_FR ;i++){
+        FRHelping[i]= DEF_POS;
+    }
+}
+
 
 void initializeGrid() {
     // Set all cells to EMPTY initially
@@ -122,7 +137,6 @@ void initializeGrid() {
     grid[3][2] = FIRE;
     grid[3][6] = FIRE;
     grid[4][6] = FIRE;
-    grid[5][4] = FIRE;
     grid[5][5] = FIRE;
     grid[5][6] = FIRE;
     grid[6][4] = FIRE;
@@ -137,13 +151,14 @@ void initializeGrid() {
     placeEntity(5, 4, 9, CIVILIAN);
     placeEntity(6, 3, 7, CIVILIAN);
     placeEntity(7, 0, 8, CIVILIAN);
+    placeEntity(8, 5, 3, CIVILIAN);
     //command to initialize the civilian automata with its coordinates
 
     //Place First Responders
-    placeEntity(8, 4, 3, FIRST_RESPONDER);
-    placeEntity(9, 7, 2, FIRST_RESPONDER);
-    placeEntity(10, 9, 4, FIRST_RESPONDER);
-    placeEntity(11, 6, 8, FIRST_RESPONDER);
+    placeEntity(9, 4, 3, FIRST_RESPONDER);
+    placeEntity(10, 7, 2, FIRST_RESPONDER);
+    placeEntity(11, 9, 4, FIRST_RESPONDER);
+    placeEntity(12, 6, 8, FIRST_RESPONDER);
    
     
     //command to initialize the FIRST_RESPONDER automata with its coordinates
@@ -154,8 +169,8 @@ void initializeGrid() {
     placeEntity(2, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
-  
-    
+    initCallingHelping();
+    initFRHelping();
 }
 
 
@@ -731,7 +746,13 @@ int calculateDistance(int id, pos_t dest) {
 
     // Arrays to track visited cells
     bool visited[GRID_H][GRID_W];
-    visited[GRID_H][GRID_W]=false;
+    int i;
+    for (i = 0; i &lt; GRID_W-1; i++) {
+        int j;
+        for (j = 0; j &lt; GRID_H-1; j++) {
+            visited[j][i] = false;
+        }
+    }
     // Check if the current position is already the destination
     if (current_pos == dest) {
         return 0;
@@ -833,6 +854,7 @@ void setSurvFree(int id){
 </declaration>
 		<location id="id18" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
+			<committed/>
 		</location>
 		<location id="id19" x="-926" y="-68">
 			<name x="-960" y="-102">InNeed</name>
@@ -925,6 +947,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id38">
 			<source ref="id20"/>
 			<target ref="id18"/>
+			<label kind="assignment" x="-415" y="-153">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
@@ -1233,6 +1256,7 @@ void resetData(){
 		</location>
 		<location id="id53" x="170" y="-8">
 			<name x="195" y="-17">Search_closest_responder</name>
+			<committed/>
 		</location>
 		<location id="id54" x="357" y="-153">
 			<name x="382" y="-161">Instruct_ZR_Call_FR</name>
@@ -1245,6 +1269,7 @@ void resetData(){
 			<urgent/>
 		</location>
 		<location id="id57" x="-612" y="161">
+			<committed/>
 		</location>
 		<init ref="id51"/>
 		<transition id="id58">
@@ -1323,8 +1348,11 @@ system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
 		<query>
-			<formula/>
+			<formula>A[] not deadlock
+</formula>
 			<comment/>
+			<result outcome="failure" type="quality" timestamp="2024-07-05 18:16:09 +0200">
+			</result>
 		</query>
 	</queries>
 </nta>
