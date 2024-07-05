@@ -1053,41 +1053,6 @@ pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
 
 
 /**
- * @brief Moves the drone in an horizontal line
- * This functions moves the drone on a horizontal patrol route, 
- * The starting direction depends on the drone's initial position  
- *
- * @param id the drone id
- */
-
-void dronePatrol(int id) {
-    if (posDrone[id].x &lt;= GRID_W/2)
-        isMovingRight = true;
-    else
-        isMovingRight = false;
-    // Check current direction and move accordingly
-    if (isMovingRight) {
-        // Move right
-        if (posDrone[id].x &lt; GRID_W - 1) {
-            posDrone[id].x++;
-        } else {
-            // Reached the right end, change direction to left
-            isMovingRight = false;
-            posDrone[id].x--;
-        }
-    } else {
-        // Move left
-        if (posDrone[id].x &gt; 0) {
-            posDrone[id].x--;
-        } else {
-            // Reached the left end, change direction to right
-            isMovingRight = true;
-            posDrone[id].x++;
-        }
-    }
-}
-
-/**
  * @brief Check if the detected survivor is available 
  * 
  *
@@ -1170,7 +1135,43 @@ void checkSurroundings(int id) {
     }
 }
 
- 
+
+
+/**
+ * @brief Moves the drone in an horizontal line
+ * This functions moves the drone on a horizontal patrol route, 
+ * The starting direction depends on the drone's initial position  
+ *
+ * @param id the drone id
+ */
+
+void dronePatrol(int id) {
+    if (posDrone[id].x &lt;= GRID_W/2)
+        isMovingRight = true;
+    else
+        isMovingRight = false;
+    // Check current direction and move accordingly
+    if (isMovingRight) {
+        // Move right
+        if (posDrone[id].x &lt; GRID_W - 1) {
+            posDrone[id].x++;
+        } else {
+            // Reached the right end, change direction to left
+            isMovingRight = false;
+            posDrone[id].x--;
+        }
+    } else {
+        // Move left
+        if (posDrone[id].x &gt; 0) {
+            posDrone[id].x--;
+        } else {
+            // Reached the left end, change direction to right
+            isMovingRight = true;
+            posDrone[id].x++;
+        }
+    }
+    checkSurroundings(id);
+}
 /**
  * @brief Check if a PNA has been detected during the surrouding check using the registered variables pos of each entity
  * 
@@ -1268,11 +1269,8 @@ void resetData(){
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id57" x="-612" y="161">
-			<committed/>
-		</location>
 		<init ref="id51"/>
-		<transition id="id58">
+		<transition id="id57">
 			<source ref="id52"/>
 			<target ref="id56"/>
 			<label kind="assignment" x="-102" y="246">resetData()</label>
@@ -1280,7 +1278,7 @@ void resetData(){
 			<nail x="-255" y="280"/>
 			<nail x="-408" y="136"/>
 		</transition>
-		<transition id="id59">
+		<transition id="id58">
 			<source ref="id54"/>
 			<target ref="id56"/>
 			<label kind="assignment" x="-85" y="-280">resetData()</label>
@@ -1288,50 +1286,43 @@ void resetData(){
 			<nail x="-255" y="-297"/>
 			<nail x="-399" y="-161"/>
 		</transition>
-		<transition id="id60">
-			<source ref="id57"/>
-			<target ref="id56"/>
-			<label kind="assignment" x="-586" y="161">checkSurroundings(id)</label>
-			<nail x="-510" y="144"/>
-			<nail x="-467" y="102"/>
-		</transition>
-		<transition id="id61">
+		<transition id="id59">
 			<source ref="id55"/>
 			<target ref="id56"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
 			<label kind="assignment" x="-331" y="-187">resetData()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
-		<transition id="id62">
+		<transition id="id60">
 			<source ref="id56"/>
-			<target ref="id57"/>
+			<target ref="id56"/>
 			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
 			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
-			<nail x="-527" y="34"/>
-			<nail x="-586" y="68"/>
+			<nail x="-544" y="51"/>
+			<nail x="-484" y="110"/>
 		</transition>
-		<transition id="id63">
+		<transition id="id61">
 			<source ref="id56"/>
 			<target ref="id55"/>
 			<label kind="guard" x="-331" y="-42">isPNANearby()</label>
 		</transition>
-		<transition id="id64">
+		<transition id="id62">
 			<source ref="id55"/>
 			<target ref="id53"/>
 			<label kind="guard" x="-51" y="-42">isSurvNearby()</label>
 		</transition>
-		<transition id="id65">
+		<transition id="id63">
 			<source ref="id51"/>
 			<target ref="id56"/>
 		</transition>
-		<transition id="id66">
+		<transition id="id64">
 			<source ref="id53"/>
 			<target ref="id52"/>
 			<label kind="guard" x="93" y="110">!isFRNearby()</label>
 			<label kind="synchronisation" x="93" y="93">assist[idSurv]!</label>
 			<label kind="assignment" x="76" y="127">setSurvBusyHelping()</label>
 		</transition>
-		<transition id="id67">
+		<transition id="id65">
 			<source ref="id53"/>
 			<target ref="id54"/>
 			<label kind="guard" x="102" y="-153">isFRNearby()</label>
