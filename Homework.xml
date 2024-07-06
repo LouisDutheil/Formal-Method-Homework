@@ -501,8 +501,8 @@ void setFRFree(int id){
 		<location id="id3" x="8" y="0">
 			<name x="-2" y="-34">Initial</name>
 		</location>
-		<location id="id4" x="-391" y="-8">
-			<name x="-401" y="-42">Rescue_person</name>
+		<location id="id4" x="-391" y="0">
+			<name x="-442" y="-34">Rescue_person</name>
 		</location>
 		<location id="id5" x="654" y="0">
 			<name x="644" y="-34">Called</name>
@@ -532,7 +532,7 @@ void setFRFree(int id){
 			<source ref="id4"/>
 			<target ref="id9"/>
 			<label kind="synchronisation" x="-527" y="-314">assistFromZR[id-N_CIVILIANS]?</label>
-			<nail x="-663" y="-8"/>
+			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
 		</transition>
 		<transition id="id12">
@@ -547,8 +547,8 @@ void setFRFree(int id){
 		<transition id="id13">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-484" y="-153">dead[getIdFromPosCivilian(helping[zrToCommTo])]?</label>
-			<label kind="assignment" x="-331" y="-170">x=0, setFRFree(id)</label>
+			<label kind="synchronisation" x="-323" y="-153">dead[idRescuing]?</label>
+			<label kind="assignment" x="-323" y="-170">x=0, setFRFree(id)</label>
 			<nail x="-246" y="-127"/>
 		</transition>
 		<transition id="id14">
@@ -608,11 +608,8 @@ void setFRFree(int id){
 		<transition id="id22">
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-305" y="-33">isNeedNear(pos[id])</label>
-			<label kind="assignment" x="-323" y="-8">x=0,saveIdRescuing(pos[id])</label>
-			<nail x="-246" y="-8"/>
-			<nail x="-255" y="-8"/>
-			<nail x="-357" y="-8"/>
+			<label kind="guard" x="-306" y="-25">isNeedNear(pos[id])</label>
+			<label kind="assignment" x="-323" y="0">x=0,saveIdRescuing(pos[id])</label>
 		</transition>
 	</template>
 	<template>
@@ -1056,7 +1053,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id51">
 			<source ref="id31"/>
 			<target ref="id32"/>
-			<label kind="synchronisation" x="374" y="332">dead[getIdFromPosCivilian(helping[id])]?</label>
+			<label kind="synchronisation" x="416" y="331">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<nail x="748" y="323"/>
 			<nail x="450" y="323"/>
 		</transition>
