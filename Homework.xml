@@ -57,7 +57,7 @@ pos_t FRHelping[N_FR];      // same principles for first responders
 chan assist[N_CIVILIANS]; // Channel used by drones to request survivors to assist
 chan callFirstResponder[N_CIVILIANS]; //Channel used by drones to request survivors to call a first responder to help a person in need
 chan assistDone[N_CIVILIANS]; // Channel used by civilian when they're saved by a zero responder/first responder
-chan assistFromZR[N_FR];  // zero responders contact fr 
+chan assistFromZR[N_FR];  // zero responders contact fr to request the help of a person in need
 broadcast chan starting;    // channel used from the initializer
 broadcast chan dead[N_CIVILIANS];  // each victim use it to advise in case of death
 
@@ -531,15 +531,15 @@ void setFRFree(int id){
 		<transition id="id11">
 			<source ref="id4"/>
 			<target ref="id9"/>
-			<label kind="synchronisation" x="-527" y="-314">assistFromZR[id-N_CIVILIANS]?</label>
+			<label kind="synchronisation" x="-527" y="-314">assistFromZR[id]?</label>
 			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
 		</transition>
 		<transition id="id12">
 			<source ref="id8"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="-399" y="221">assistFromZR[id-N_CIVILIANS]?</label>
-			<label kind="assignment" x="-399" y="238">x=0,setWaiting(pos[id])</label>
+			<label kind="synchronisation" x="-162" y="306">assistFromZR[id]?</label>
+			<label kind="assignment" x="-170" y="323">x=0,setWaiting(pos[id])</label>
 			<nail x="-204" y="349"/>
 			<nail x="917" y="349"/>
 			<nail x="917" y="1"/>
@@ -547,9 +547,10 @@ void setFRFree(int id){
 		<transition id="id13">
 			<source ref="id4"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-323" y="-153">dead[idRescuing]?</label>
-			<label kind="assignment" x="-323" y="-170">x=0, setFRFree(id)</label>
-			<nail x="-246" y="-127"/>
+			<label kind="synchronisation" x="-323" y="-161">dead[idRescuing]?</label>
+			<label kind="assignment" x="-323" y="-144">x=0, setFRFree(id)</label>
+			<nail x="-391" y="-119"/>
+			<nail x="-119" y="-119"/>
 		</transition>
 		<transition id="id14">
 			<source ref="id8"/>
@@ -560,13 +561,13 @@ void setFRFree(int id){
 			<source ref="id4"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-391" y="25">x&gt;Tfr</label>
-			<label kind="synchronisation" x="-578" y="42">assistDone[idRescuing]!</label>
+			<label kind="synchronisation" x="-595" y="42">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="-552" y="59">x=0, setFRFree(id)</label>
 		</transition>
 		<transition id="id16">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="42" y="110">dead[getIdFromPosCivilian(helping[zrToCommTo])]?</label>
+			<label kind="synchronisation" x="127" y="110">dead[idRescuing]?</label>
 			<label kind="assignment" x="144" y="127">setFRFree(id)</label>
 			<nail x="289" y="102"/>
 			<nail x="93" y="102"/>
@@ -574,7 +575,7 @@ void setFRFree(int id){
 		<transition id="id17">
 			<source ref="id7"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="76" y="-76">starting?</label>
+			<label kind="synchronisation" x="110" y="-68">starting?</label>
 			<label kind="assignment" x="110" y="-51">setTfr()</label>
 		</transition>
 		<transition id="id18">
@@ -594,8 +595,8 @@ void setFRFree(int id){
 		<transition id="id20">
 			<source ref="id3"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="59" y="0">assistFromZR[id-N_CIVILIANS]?</label>
-			<label kind="assignment" x="42" y="17">x=0,setWaiting(pos[id])</label>
+			<label kind="synchronisation" x="178" y="0">assistFromZR[id]?</label>
+			<label kind="assignment" x="161" y="17">x=0,setWaiting(pos[id])</label>
 		</transition>
 		<transition id="id21">
 			<source ref="id3"/>
@@ -619,6 +620,7 @@ void setFRFree(int id){
 int Tzr;
 int waitingHelping;
 int waitingFR;
+int idFRtoCall; //id of the first responder the current civilian is calling
 
 /**
  * @brief set the time it takes for a specific survivor to help a person in need once reached
@@ -883,13 +885,14 @@ void setWaiting(){
 }
 
 /**
- * @brief sets time it takes for a civilian to reach the first responder
+ * @brief sets time it takes for a civilian to reach the first responder and the id of the fr to call
  */
 void setWaitingfr(){
    pos_t f;
    f.x = calling[id].x;
    f.y = calling[id].y;
    waitingFR = abs(calculateDistance(id,f));
+   idFRtoCall = getIdFromPosFirstResponder(f);
 }
 
 
@@ -996,7 +999,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id43">
 			<source ref="id25"/>
 			<target ref="id23"/>
-			<label kind="assignment" x="-415" y="-153">move(id)</label>
+			<label kind="assignment" x="-331" y="-178">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
@@ -1020,7 +1023,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<target ref="id33"/>
 			<label kind="synchronisation" x="59" y="-493">callFirstResponder[id]?</label>
 			<label kind="assignment" x="76" y="-510">x:=0, setWaitingfr()</label>
-			<nail x="-93" y="-467"/>
+			<nail x="-102" y="-467"/>
 		</transition>
 		<transition id="id47">
 			<source ref="id25"/>
@@ -1068,7 +1071,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id34"/>
 			<target ref="id35"/>
 			<label kind="synchronisation" x="288" y="-254">dead[getIdFromPosCivilian(helping[id])]?</label>
-			<label kind="assignment" x="374" y="-229">setSurvFree(id)</label>
+			<label kind="assignment" x="374" y="-238">setSurvFree(id)</label>
 			<nail x="705" y="-254"/>
 		</transition>
 		<transition id="id54">
@@ -1082,9 +1085,9 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id55">
 			<source ref="id33"/>
 			<target ref="id34"/>
-			<label kind="guard" x="866" y="-365">x &gt;= waitingFR</label>
-			<label kind="synchronisation" x="867" y="-323">assistFromZR[getIdFromPosFirstResponder(calling[id])-N_CIVILIANS]!</label>
-			<label kind="assignment" x="866" y="-348">x=0, setWaiting()</label>
+			<label kind="guard" x="867" y="-340">x &gt;= waitingFR</label>
+			<label kind="synchronisation" x="868" y="-306">assistFromZR[idFRtoCall]!</label>
+			<label kind="assignment" x="867" y="-323">x=0, setWaiting()</label>
 		</transition>
 	</template>
 	<template>
