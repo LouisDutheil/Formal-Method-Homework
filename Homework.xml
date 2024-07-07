@@ -49,6 +49,9 @@ pos_t posDrone[N_DRONES];
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t FRHelping[N_FR];      // same principles for first responders  
+int Tscs;
+int N_perc;
+int N_SAFE = 0;
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -171,6 +174,8 @@ void initializeGrid() {
 
     initCallingHelping();
     initFRHelping();
+    Tscs = 20;
+    N_perc= 30;
 }
 
 
@@ -898,10 +903,16 @@ void setWaiting(){
  */
 void setWaitingfr(){
    pos_t f;
+   int potentialIdFR;
    f.x = calling[id].x;
    f.y = calling[id].y;
    waitingFR = abs(calculateDistance(id,f));
-   idFRtoCall = getIdFromPosFirstResponder(f)-N_CIVILIANS;
+   potentialIdFR = getIdFromPosFirstResponder(f);
+    if (potentialIdFR &gt;= N_CIVILIANS &amp;&amp; potentialIdFR &lt; N_CIVILIANS + N_FR) {
+        idFRtoCall = potentialIdFR - N_CIVILIANS;
+    } else {
+        idFRtoCall = 0; 
+    }
 }
 
 
@@ -968,8 +979,9 @@ void setSurvFree(int id){
 		<transition id="id39">
 			<source ref="id34"/>
 			<target ref="id28"/>
-			<label kind="assignment" x="-102" y="229">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-102" y="212">x = 0,
+grid[pos[id].y][pos[id].x] = EMPTY, 
+N_SAFE+=N_SAFE</label>
 			<nail x="-238" y="272"/>
 		</transition>
 		<transition id="id40">
@@ -995,8 +1007,9 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id31"/>
 			<target ref="id28"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
-			<label kind="assignment" x="-110" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-127" y="68">x = 0,
+grid[pos[id].y][pos[id].x] = EMPTY,
+N_SAFE+=N_SAFE</label>
 		</transition>
 		<transition id="id44">
 			<source ref="id29"/>
@@ -1016,7 +1029,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id26"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="-884" y="67">assistDone[id]?</label>
-			<label kind="assignment" x="-884" y="84">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-884" y="84">grid[pos[id].y][pos[id].x] = EMPTY, N_SAFE+=N_SAFE</label>
 			<label kind="comments" x="-790" y="119">when helped and time for helping finishes</label>
 			<nail x="-926" y="110"/>
 		</transition>
@@ -1043,8 +1056,9 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 		<transition id="id50">
 			<source ref="id25"/>
 			<target ref="id28"/>
-			<label kind="guard" x="-578" y="34">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-586" y="51">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
+			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,
+N_SAFE+=N_SAFE</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id51">
@@ -1401,8 +1415,7 @@ system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
 		<query>
-			<formula>A[] not deadlock
-</formula>
+			<formula>E&lt;&gt; (x &lt;= Tscs and (N_SAFE &gt;= (N_perc/100) * N_CIVILIANS))</formula>
 			<comment/>
 		</query>
 	</queries>
