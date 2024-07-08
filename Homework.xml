@@ -49,9 +49,7 @@ pos_t posDrone[N_DRONES];
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t FRHelping[N_FR];      // same principles for first responders  
-int Tscs;
-int N_perc;
-int N_SAFE = 0;
+
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -174,8 +172,6 @@ void initializeGrid() {
 
     initCallingHelping();
     initFRHelping();
-    Tscs = 20;
-    N_perc= 30;
 }
 
 
@@ -968,8 +964,7 @@ void setSurvFree(int id){
 			<source ref="id33"/>
 			<target ref="id27"/>
 			<label kind="assignment" x="-102" y="212">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY, 
-N_SAFE+=N_SAFE</label>
+grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="-238" y="272"/>
 		</transition>
 		<transition id="id39">
@@ -996,8 +991,7 @@ N_SAFE+=N_SAFE</label>
 			<target ref="id27"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
 			<label kind="assignment" x="-127" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY,
-N_SAFE+=N_SAFE</label>
+grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
 		<transition id="id43">
 			<source ref="id28"/>
@@ -1016,16 +1010,16 @@ N_SAFE+=N_SAFE</label>
 		<transition id="id45">
 			<source ref="id25"/>
 			<target ref="id27"/>
-			<label kind="synchronisation" x="-884" y="67">assistDone[id]?</label>
-			<label kind="assignment" x="-884" y="84">grid[pos[id].y][pos[id].x] = EMPTY, N_SAFE+=N_SAFE</label>
-			<label kind="comments" x="-790" y="119">when helped and time for helping finishes</label>
-			<nail x="-926" y="110"/>
+			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
+			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
+			<nail x="-902" y="110"/>
 		</transition>
 		<transition id="id46">
 			<source ref="id25"/>
 			<target ref="id29"/>
 			<label kind="guard" x="-918" y="-195">x &gt;= Tv</label>
-			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
+			<label kind="synchronisation" x="-918" y="-161">dead[0]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
 		<transition id="id47">
@@ -1045,8 +1039,7 @@ N_SAFE+=N_SAFE</label>
 			<source ref="id24"/>
 			<target ref="id27"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,
-N_SAFE+=N_SAFE</label>
+			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id50">
@@ -1379,7 +1372,6 @@ void resetData(){
 		<transition id="id69">
 			<source ref="id57"/>
 			<target ref="id62"/>
-			<label kind="synchronisation" x="-508" y="-25">starting?</label>
 		</transition>
 		<transition id="id70">
 			<source ref="id59"/>
