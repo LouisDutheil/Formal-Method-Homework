@@ -527,6 +527,7 @@ void setFRFree(int id){
 			<committed/>
 		</location>
 		<location id="id9" x="-34" y="-289">
+			<label kind="invariant" x="-44" y="-272">x&lt;=Tfr</label>
 		</location>
 		<location id="id10" x="42" y="178">
 			<committed/>
@@ -557,7 +558,7 @@ void setFRFree(int id){
 			<source ref="id4"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-645" y="-34">x&lt;Tfr</label>
-			<label kind="synchronisation" x="-527" y="-314">assistFromZR[getID_CHAN()]?</label>
+			<label kind="synchronisation" x="-527" y="-314">assistFromZR[id_chan]?</label>
 			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
 		</transition>
