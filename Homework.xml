@@ -49,7 +49,9 @@ pos_t posDrone[N_DRONES];
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t FRHelping[N_FR];      // same principles for first responders  
-
+int N_SAFE;
+int Tscs = 50;
+int N_perc = 0.3;   // meaning 30%
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -174,6 +176,7 @@ void initializeGrid() {
 
     initCallingHelping();
     initFRHelping();
+    N_SAFE=0;
 }
 
 
@@ -877,7 +880,7 @@ void setSurvFree(int id){
 			<source ref="id37"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="221" y="178">assistDone[id]?</label>
-			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
 			<nail x="858" y="170"/>
 			<nail x="-136" y="170"/>
 		</transition>
@@ -912,8 +915,8 @@ void setSurvFree(int id){
 			<source ref="id34"/>
 			<target ref="id31"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
-			<label kind="assignment" x="-127" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-195" y="68">x = 0,
+grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
 		</transition>
 		<transition id="id45">
 			<source ref="id32"/>
@@ -933,7 +936,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id29"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
-			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, N_SAFE=N_SAFE+1</label>
 			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
 			<nail x="-902" y="110"/>
 		</transition>
@@ -961,7 +964,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<source ref="id28"/>
 			<target ref="id31"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id52">
@@ -1304,8 +1307,8 @@ system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
 		<query>
-			<formula/>
-			<comment/>
+			<formula>A[] ( N_SAFE&gt;=(N_CIVILIANS*N_perc))</formula>
+			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 		</query>
 	</queries>
 </nta>
