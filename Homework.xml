@@ -20,12 +20,12 @@ const int N = 5;
 
 const int GRID_W = 10; //grid width
 const int GRID_H = 10; //grid height
-const int N_CIVILIANS = 9;  // Total number of civilians
-const int N_DRONES = 3; //Total number of drones 
-const int N_FR = 4; // Total number of first responders
+const int N_CIVILIANS = 3;  // Total number of civilians
+const int N_DRONES = 1; //Total number of drones 
+const int N_FR = 1; // Total number of first responders
 const int Tv = 10; //time for the civilian to die close to a fire
 const int Tfr = 10; //time to save a person
-const int Nv = 1; //Drone detection range
+const int Nv = 9; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[0,N_DRONES-1] id_dr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
@@ -147,27 +147,28 @@ void initializeGrid() {
     placeEntity(0, 3, 4, CIVILIAN);
     placeEntity(1, 6, 3, CIVILIAN);
     placeEntity(2, 8, 6, CIVILIAN);
-    placeEntity(3, 9, 8, CIVILIAN);
-    placeEntity(4, 7, 9, CIVILIAN);
-    placeEntity(5, 4, 9, CIVILIAN);
-    placeEntity(6, 3, 7, CIVILIAN);
-    placeEntity(7, 0, 8, CIVILIAN);
-    placeEntity(8, 5, 3, CIVILIAN);
+    //placeEntity(3, 9, 8, CIVILIAN);
+    //placeEntity(4, 7, 9, CIVILIAN);
+    //placeEntity(5, 4, 9, CIVILIAN);
+    //placeEntity(6, 3, 7, CIVILIAN);
+    //placeEntity(7, 0, 8, CIVILIAN);
+    //placeEntity(8, 5, 3, CIVILIAN);
+
     //command to initialize the civilian automata with its coordinates
 
     //Place First Responders
-    placeEntity(9, 4, 3, FIRST_RESPONDER);
-    placeEntity(10, 7, 2, FIRST_RESPONDER);
-    placeEntity(11, 9, 4, FIRST_RESPONDER);
-    placeEntity(12, 6, 8, FIRST_RESPONDER);
+    placeEntity(3, 4, 3, FIRST_RESPONDER);
+    //placeEntity(10, 7, 2, FIRST_RESPONDER);
+    //placeEntity(11, 9, 4, FIRST_RESPONDER);
+    //placeEntity(12, 6, 8, FIRST_RESPONDER);
    
     
     //command to initialize the FIRST_RESPONDER automata with its coordinates
 
     //Place Drones
     placeEntity(0, 1, 0, DRONE);
-    placeEntity(1, 4, 0, DRONE);
-    placeEntity(2, 7, 0, DRONE);
+    //placeEntity(1, 4, 0, DRONE);
+    //placeEntity(2, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
     initCallingHelping();
@@ -400,84 +401,26 @@ void move(int id) {
     }
 }
 
-
 /**
- * @brief Calculates the distance of a fr to the specified destination avoiding cells near fire.
+ * @brief Calculates the Manhattan distance of a fr to the specified destination.
  *
- * This function calculates the shortest distance from the fr's current position
- * to the specified destination (destx, desty) while avoiding cells near fire.
+ * This function calculates the Manhattan distance from the fr's current position
+ * to the specified destination (destx, desty).
  *
  * @param id The identifier of the civilian.
- * @param destx The x-coordinate of the destination.
- * @param desty The y-coordinate of the destination.
- * @return The distance to the destination, or -1 if the destination is not reachable.
+ * @param dest The position of the destination.
+ * @return The Manhattan distance to the destination.
  */
 int calculateDistance(int id, pos_t dest) {
     // Current position of the civilian
     pos_t current_pos = pos[id];
 
-    // Directions for vertical and horizontal neighbors only
-    const int DX[4] = {-1, 1, 0, 0}; // Up, Down
-    const int DY[4] = {0, 0, -1, 1}; // Left, Right
+    // Calculate Manhattan distance
+    int distance = abs(current_pos.x - dest.x) + abs(current_pos.y - dest.y);
 
-    // Queue for BFS (simulated using arrays)
-    int qx[GRID_W * GRID_H];
-    int qy[GRID_W * GRID_H];
-    int dist[GRID_W * GRID_H];
-    int front = 0;
-    int rear = 0;
-
-    // Arrays to track visited cells
-    bool visited[GRID_H][GRID_W];
-    int i;
-    for (i = 0; i &lt; GRID_W-1; i++) {
-        int j;
-        for (j = 0; j &lt; GRID_H-1; j++) {
-            visited[j][i] = false;
-        }
-    }
-    // Check if the current position is already the destination
-    if (current_pos.x == dest.x &amp;&amp; current_pos.y == dest.y) {
-        return 0;
-    }
-
-    // Initialize BFS
-    qx[rear] = current_pos.x;
-    qy[rear] = current_pos.y;
-    dist[rear] = 0;
-    rear++;
-    visited[current_pos.y][current_pos.x] = true;
-
-    // BFS loop
-    while (front &lt; rear) {
-        int curr_x = qx[front];
-        int curr_y = qy[front];
-        int curr_dist = dist[front];
-        int i;
-
-        front++;
-
-        for (i = 0; i &lt; 4; i++) {
-            int new_x = curr_x + DX[i];
-            int new_y = curr_y + DY[i];
-
-            if (isValid(new_x, new_y) &amp;&amp; !visited[new_y][new_x] &amp;&amp; grid[new_y][new_x] == EMPTY /*&amp;&amp; !isFireNear(new_x, new_y)*/) {
-                if (new_x == dest.x &amp;&amp; new_y == dest.y) {
-                    return curr_dist + 1;
-                }
-
-                qx[rear] = new_x;
-                qy[rear] = new_y;
-                dist[rear] = curr_dist + 1;
-                rear++;
-                visited[new_y][new_x] = true;
-            }
-        }
-    }
-
-    // If we exhaust the queue without finding the destination
-    return -1;
+    return distance;
 }
+
 
 
 int getID_CHAN(){
