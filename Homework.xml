@@ -1319,10 +1319,10 @@ system Civilian, FirstResponder, Initializer,Drone;
 			</result>
 		</query>
 		<query>
-			<formula>E[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
+			<formula>A[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="failure" type="quality" timestamp="2024-07-10 15:31:24 +0200">
+			<result outcome="failure" type="quality" timestamp="2024-07-10 15:32:19 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
