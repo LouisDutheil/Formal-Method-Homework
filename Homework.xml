@@ -34,8 +34,8 @@ const pos_t  DEF_POS = {-1, -1};
 
 /********* VERIFICATION PARAMETERS *******************/
 
-int Tscs = 30;
-int N_perc = 30;   // meaning 30%
+int Tscs = 15;
+int N_perc = 60;   // meaning 30%
 
 /********* VERIFICATION VARIABLES *******************/
 
@@ -250,8 +250,10 @@ int Tfr;
 int id_chan;
 
 void setTfr(){
-    Tfr= 5;
-    id_chan = id-N_CIVILIANS; 
+    Tfr= id-4;
+    if(Tfr&gt;5){
+    Tfr= abs(id-7);
+    } 
 }
 
 
@@ -610,16 +612,18 @@ void setFRFree(int id){
 		<name>Civilian</name>
 		<parameter>const id_zr id</parameter>
 		<declaration>clock x;
-int Tzr;
 int waitingHelping;
 int waitingFR;
 int idFRtoCall; //id of the first responder the current civilian is calling
-
+int Tzr;
 /**
  * @brief set the time it takes for a specific survivor to help a person in need once reached
  */
 void setTzr(){
-    Tzr= 2; 
+    Tzr= 2+id;
+    if(Tzr&gt;5){
+    Tzr= abs(id-5);
+    } 
 }
 
 
@@ -948,7 +952,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<target ref="id33"/>
 			<label kind="guard" x="-918" y="-195">x &gt;= Tv</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
-			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY, x=0</label>
 		</transition>
 		<transition id="id49">
 			<source ref="id30"/>
@@ -1307,6 +1311,7 @@ setFRBusyHelping()</label>
 // List one or more processes to be composed into a system.
 // System Declaration
 system Civilian, FirstResponder, Initializer,Drone;
+
 </system>
 	<queries>
 		<option key="--diagnostic" value="0"/>
@@ -1314,17 +1319,21 @@ system Civilian, FirstResponder, Initializer,Drone;
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-10 15:29:20 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-10 16:37:21 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
-			<formula>A[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
-			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
-			<option key="--diagnostic" value="0"/>
-			<result outcome="failure" type="quality" timestamp="2024-07-10 15:32:19 +0200">
+			<formula>A&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-07-10 16:37:24 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
+		</query>
+		<query>
+			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
+			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
+			<option key="--diagnostic" value="0"/>
 		</query>
 	</queries>
 </nta>
