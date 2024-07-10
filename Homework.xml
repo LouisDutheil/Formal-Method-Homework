@@ -20,12 +20,12 @@ const int CIVILIAN = 8;
 
 const int GRID_W = 10; //grid width
 const int GRID_H = 10; //grid height
-const int N_CIVILIANS = 3;  // Total number of civilians
-const int N_DRONES = 1; //Total number of drones 
-const int N_FR = 1; // Total number of first responders
+const int N_CIVILIANS = 9;  // Total number of civilians
+const int N_DRONES = 2; //Total number of drones 
+const int N_FR = 4; // Total number of first responders
 const int Tv = 20; //time for the civilian to die close to a fire
 const int Tfr = 5; //time to save a person
-const int Nv = 9; //Drone detection range
+const int Nv = 1; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[0,N_DRONES-1] id_dr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
@@ -34,7 +34,7 @@ const pos_t  DEF_POS = {-1, -1};
 
 /********* VERIFICATION PARAMETERS *******************/
 
-int Tscs = 50;
+int Tscs = 30;
 int N_perc = 30;   // meaning 30%
 
 /********* VERIFICATION VARIABLES *******************/
@@ -47,8 +47,6 @@ int n_safe = 0; // n. of saved civilians
 int grid[GRID_H][GRID_W];    // map considering role
 // arrays used to put in relations ids with positions of entities (useful for drones too when contacting zero responders)
 pos_t pos[N_CIVILIANS+N_FR];        // Array of coordinates of all civ+fr
-// int posx[N_CIVILIANS+N_FR];       // Array of x coordinates of all civ+fr 
-// int posy[N_CIVILIANS+N_FR];       // Array of y coordinates of all civ+fr
 pos_t posDrone[N_DRONES];
 
 //todo remove int xNeed[GRID_H][GRID_W];   // X coordinate for need requests, xNeed[1][2] set to 5 indicates that the civilian found at coordinates (y=1,x=2) is in charge of saving the person in need found at x = 5  
@@ -65,8 +63,7 @@ pos_t FRHelping[N_FR];      // same principles for first responders
 
 chan assist[N_CIVILIANS]; // Channel used by drones to request survivors to assist
 chan callFirstResponder[N_CIVILIANS]; //Channel used by drones to request survivors to call a first responder to help a person in need
-chan assistDone[N_CIVILIANS]; // Channel used by civilian when they're saved by a zero responder/first responder
-chan assistFromZR[N_FR];  // zero responders contact fr to request the help of a person in need
+chan assistDone[N_CIVILIANS+N_FR]; // Channel used by civilian when they're saved by a zero responder/first responder
 broadcast chan starting;    // channel used from the initializer
 broadcast chan dead[N_CIVILIANS];  // each victim use it to advise in case of death
 chan wrong[N_CIVILIANS];
@@ -156,20 +153,20 @@ void initializeGrid() {
     placeEntity(0, 3, 4, CIVILIAN);
     placeEntity(1, 6, 3, CIVILIAN);
     placeEntity(2, 8, 6, CIVILIAN);
-    //placeEntity(3, 9, 8, CIVILIAN);
-    //placeEntity(4, 7, 9, CIVILIAN);
-    //placeEntity(5, 4, 9, CIVILIAN);
-    //placeEntity(6, 3, 7, CIVILIAN);
-    //placeEntity(7, 0, 8, CIVILIAN);
-    //placeEntity(8, 5, 3, CIVILIAN);
+    placeEntity(3, 9, 8, CIVILIAN);
+    placeEntity(4, 7, 9, CIVILIAN);
+    placeEntity(5, 4, 9, CIVILIAN);
+    placeEntity(6, 3, 7, CIVILIAN);
+    placeEntity(7, 0, 8, CIVILIAN);
+    placeEntity(8, 5, 3, CIVILIAN);
 
     //command to initialize the civilian automata with its coordinates
 
     //Place First Responders
-    placeEntity(3, 4, 3, FIRST_RESPONDER);
-    //placeEntity(10, 7, 2, FIRST_RESPONDER);
-    //placeEntity(11, 9, 4, FIRST_RESPONDER);
-    //placeEntity(12, 6, 8, FIRST_RESPONDER);
+    placeEntity(9, 4, 3, FIRST_RESPONDER);
+    placeEntity(10, 7, 2, FIRST_RESPONDER);
+    placeEntity(11, 9, 4, FIRST_RESPONDER);
+    placeEntity(12, 6, 8, FIRST_RESPONDER);
    
     
     //command to initialize the FIRST_RESPONDER automata with its coordinates
@@ -177,7 +174,7 @@ void initializeGrid() {
     //Place Drones
     placeEntity(0, 1, 0, DRONE);
     //placeEntity(1, 4, 0, DRONE);
-    //placeEntity(2, 7, 0, DRONE);
+    placeEntity(1, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
     initCallingHelping();
@@ -544,7 +541,7 @@ void setFRFree(int id){
 			<source ref="id4"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-645" y="-34">x&lt;Tfr</label>
-			<label kind="synchronisation" x="-527" y="-314">assistFromZR[id_chan]?</label>
+			<label kind="synchronisation" x="-527" y="-314">assistDone[id]?</label>
 			<label kind="assignment" x="-645" y="0">setWaiting(pos[id])</label>
 			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
@@ -591,7 +588,7 @@ void setFRFree(int id){
 		<transition id="id25">
 			<source ref="id3"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="178" y="0">assistFromZR[id_chan]?</label>
+			<label kind="synchronisation" x="178" y="0">assistDone[id]?</label>
 			<label kind="assignment" x="161" y="17">x=0,setWaiting(pos[id])</label>
 		</transition>
 		<transition id="id26">
@@ -832,7 +829,7 @@ void setWaitingfr() {
     f.x = calling[id].x;
     f.y = calling[id].y;
     waitingFR = abs(calculateDistance(id, f));
-    idFRtoCall = getIdFromPosFirstResponder(f) - N_CIVILIANS;
+    idFRtoCall = abs(getIdFromPosFirstResponder(f));
 }
 
 /**
@@ -886,7 +883,7 @@ void setSurvFree(int id){
 			<source ref="id37"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="221" y="178">assistDone[id]?</label>
-			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY</label>
 			<nail x="858" y="170"/>
 			<nail x="-136" y="170"/>
 		</transition>
@@ -922,7 +919,7 @@ void setSurvFree(int id){
 			<target ref="id31"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
 			<label kind="assignment" x="-195" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
 		<transition id="id45">
 			<source ref="id32"/>
@@ -934,7 +931,7 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 		<transition id="id46">
 			<source ref="id30"/>
 			<target ref="id28"/>
-			<label kind="assignment" x="-331" y="-178">move(id)</label>
+			<label kind="assignment" x="-391" y="-178">move(id), n_safe=n_safe-1</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
@@ -978,7 +975,7 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<target ref="id30"/>
 			<label kind="guard" x="-442" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
 !isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
+			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR,n_safe=n_safe+1</label>
 		</transition>
 		<transition id="id53">
 			<source ref="id28"/>
@@ -1007,7 +1004,7 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<source ref="id36"/>
 			<target ref="id37"/>
 			<label kind="guard" x="867" y="-340">x &gt;= waitingFR</label>
-			<label kind="synchronisation" x="867" y="-297">assistFromZR[idFRtoCall]!</label>
+			<label kind="synchronisation" x="867" y="-297">assistDone[idFRtoCall]!</label>
 			<label kind="assignment" x="867" y="-323">setWaiting()</label>
 		</transition>
 	</template>
@@ -1312,15 +1309,22 @@ setFRBusyHelping()</label>
 system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
+		<option key="--diagnostic" value="0"/>
 		<query>
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
-			<result outcome="success" type="quality" timestamp="2024-07-10 11:58:43 +0200">
+			<option key="--diagnostic" value="1"/>
+			<result outcome="success" type="quality" timestamp="2024-07-10 15:29:20 +0200">
+				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
-			<formula>A[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
+			<formula>E[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
+			<option key="--diagnostic" value="0"/>
+			<result outcome="failure" type="quality" timestamp="2024-07-10 15:31:24 +0200">
+				<option key="--diagnostic" value="0"/>
+			</result>
 		</query>
 	</queries>
 </nta>
