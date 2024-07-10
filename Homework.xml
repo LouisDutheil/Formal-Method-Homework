@@ -13,7 +13,7 @@ const int SURVIVOR = 5;
 const int SAFE = 6;
 const int NEED = 7;
 const int CIVILIAN = 8;
-const int N = 5;
+// const int N = 5;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
@@ -31,8 +31,16 @@ typedef int[0,N_DRONES-1] id_dr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
 typedef struct { int x, y; } pos_t;
 const pos_t  DEF_POS = {-1, -1};
-/*********GLOBAL SYSTEM PARAMETERS ****************/
 
+/********* VERIFICATION PARAMETERS *******************/
+
+int Tscs = 50;
+int N_perc = 30;   // meaning 30%
+
+/********* VERIFICATION VARIABLES *******************/
+
+clock global_time = 0;
+int n_safe = 0; // n. of saved civilians
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -49,9 +57,7 @@ pos_t posDrone[N_DRONES];
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t FRHelping[N_FR];      // same principles for first responders  
-int N_SAFE;
-int Tscs = 50;
-int N_perc = 0.3;   // meaning 30%
+
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -176,7 +182,7 @@ void initializeGrid() {
 
     initCallingHelping();
     initFRHelping();
-    N_SAFE=0;
+    n_safe=0;
 }
 
 
@@ -880,7 +886,7 @@ void setSurvFree(int id){
 			<source ref="id37"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="221" y="178">assistDone[id]?</label>
-			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
+			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="858" y="170"/>
 			<nail x="-136" y="170"/>
 		</transition>
@@ -916,7 +922,7 @@ void setSurvFree(int id){
 			<target ref="id31"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
 			<label kind="assignment" x="-195" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
+grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 		</transition>
 		<transition id="id45">
 			<source ref="id32"/>
@@ -936,7 +942,7 @@ grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
 			<source ref="id29"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
-			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, N_SAFE=N_SAFE+1</label>
+			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, n_safe=n_safe+1</label>
 			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
 			<nail x="-902" y="110"/>
 		</transition>
@@ -964,7 +970,7 @@ grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
 			<source ref="id28"/>
 			<target ref="id31"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,N_SAFE=N_SAFE+1</label>
+			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id52">
@@ -1307,7 +1313,13 @@ system Civilian, FirstResponder, Initializer,Drone;
 </system>
 	<queries>
 		<query>
-			<formula>A[] ( N_SAFE&gt;=(N_CIVILIANS*N_perc))</formula>
+			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
+			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
+			<result outcome="success" type="quality" timestamp="2024-07-10 11:58:43 +0200">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 		</query>
 	</queries>
