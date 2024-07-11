@@ -247,8 +247,6 @@ int getIdFromPosFirstResponder(pos_t posFR){
 		<declaration>clock x;
 int id_chan;
 
-
-
 int idRescuing; // id person we're rescuing
 int waiting; // distance from person in need when zr called
 int zrToCommTo; // id zr to contact when finishing Tfr
@@ -329,6 +327,17 @@ void saveIdRescuing(pos_t posResc){
     }
 }
 
+
+bool isInCalling(){
+   pos_t posFR = pos[id];
+   int i;
+   for(i=0;i&lt;N_CIVILIANS;i++){
+      if(calling[i] == posFR){
+            return true;   
+     }
+    }
+    return false;
+}
 /**
  * @brief Moves a first responder to the center of the grid
  *
@@ -350,10 +359,14 @@ void move(int id) {
     int dist_bottom = GRID_H - 1 - current_y;
     int dist_left = current_x;
     int dist_right = GRID_W - 1 - current_x;
+    bool change;
 
     // Determine the direction going near the center
     int max_dist = 0;
     int direction = 0; // 0 for top, 1 for bottom, 2 for left, 3 for right
+
+    if(isInCalling()){  change=1;}
+    else change=0;
 
     if (dist_top &gt; max_dist &amp;&amp; grid[current_y - 1][current_x]!= FIRE ) {
         max_dist = dist_top;
@@ -392,7 +405,7 @@ void move(int id) {
     }
 
     // Check if the new position is valid and not near fire
-    if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H) {
+    if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H &amp;&amp; change==0) {
         if (grid[new_y][new_x] == EMPTY) {
             pos[id].x = new_x;
             pos[id].y = new_y;
@@ -400,6 +413,7 @@ void move(int id) {
             grid[new_y][new_x] = FIRST_RESPONDER; //update the grid
         }
     }
+    
 }
 
 /**
@@ -422,11 +436,6 @@ int calculateDistance(int id, pos_t dest) {
     return distance;
 }
 
-
-
-int getID_CHAN(){
-    return id_chan;
-}
 
 bool differentPerson(){
    pos_t pos_rescue;
@@ -462,6 +471,7 @@ void setFRFree(int id){
 }</declaration>
 		<location id="id3" x="8" y="0">
 			<name x="-2" y="-34">Initial</name>
+			<label kind="invariant" x="-2" y="17">x&lt;=Tv</label>
 		</location>
 		<location id="id4" x="-391" y="0">
 			<name x="-442" y="-34">Rescue_person</name>
@@ -489,8 +499,16 @@ void setFRFree(int id){
 		<location id="id11" x="-136" y="-212">
 			<committed/>
 		</location>
+		<location id="id12" x="-272" y="229">
+			<name x="-282" y="195">End</name>
+		</location>
 		<init ref="id7"/>
-		<transition id="id12">
+		<transition id="id13">
+			<source ref="id3"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-229" y="144">x&gt;=Tv</label>
+		</transition>
+		<transition id="id14">
 			<source ref="id6"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="391" y="102">dead[idRescuing]?</label>
@@ -498,33 +516,33 @@ void setFRFree(int id){
 			<nail x="280" y="102"/>
 			<nail x="76" y="102"/>
 		</transition>
-		<transition id="id13">
+		<transition id="id15">
 			<source ref="id11"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="-119" y="-204">wrong[zrToCommTo]!</label>
 		</transition>
-		<transition id="id14">
+		<transition id="id16">
 			<source ref="id9"/>
 			<target ref="id11"/>
 			<label kind="guard" x="-297" y="-280">x&gt;=Tfr &amp;&amp; !differentPerson()</label>
 			<label kind="synchronisation" x="-289" y="-263">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="-272" y="-246">x=0,setFRFree(id)</label>
 		</transition>
-		<transition id="id15">
+		<transition id="id17">
 			<source ref="id6"/>
 			<target ref="id10"/>
 			<label kind="guard" x="212" y="204">x&gt;=Tfr</label>
 			<label kind="synchronisation" x="145" y="186">assistDone[zrToCommTo]!</label>
 			<label kind="assignment" x="229" y="221">x=0</label>
 		</transition>
-		<transition id="id16">
+		<transition id="id18">
 			<source ref="id10"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="-178" y="127">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="-136" y="153">setFRFree(id)</label>
 			<nail x="8" y="178"/>
 		</transition>
-		<transition id="id17">
+		<transition id="id19">
 			<source ref="id9"/>
 			<target ref="id5"/>
 			<label kind="guard" x="204" y="-331">x&gt;=Tfr &amp;&amp; differentPerson()</label>
@@ -532,7 +550,7 @@ void setFRFree(int id){
 			<label kind="assignment" x="178" y="-289">x=0</label>
 			<nail x="654" y="-289"/>
 		</transition>
-		<transition id="id18">
+		<transition id="id20">
 			<source ref="id4"/>
 			<target ref="id9"/>
 			<label kind="guard" x="-645" y="-34">x&lt;Tfr</label>
@@ -541,7 +559,7 @@ void setFRFree(int id){
 			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
 		</transition>
-		<transition id="id19">
+		<transition id="id21">
 			<source ref="id4"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="-323" y="-161">dead[idRescuing]?</label>
@@ -549,18 +567,18 @@ void setFRFree(int id){
 			<nail x="-391" y="-119"/>
 			<nail x="-119" y="-119"/>
 		</transition>
-		<transition id="id20">
+		<transition id="id22">
 			<source ref="id8"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="-263" y="93">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="-238" y="76">move(id),x=0, setFRFree(id)</label>
 		</transition>
-		<transition id="id21">
+		<transition id="id23">
 			<source ref="id4"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-382" y="42">x&gt;=Tfr</label>
 		</transition>
-		<transition id="id22">
+		<transition id="id24">
 			<source ref="id5"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="127" y="110">dead[idRescuing]?</label>
@@ -568,24 +586,24 @@ void setFRFree(int id){
 			<nail x="289" y="102"/>
 			<nail x="93" y="102"/>
 		</transition>
-		<transition id="id23">
+		<transition id="id25">
 			<source ref="id7"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="110" y="-68">starting?</label>
 		</transition>
-		<transition id="id24">
+		<transition id="id26">
 			<source ref="id5"/>
 			<target ref="id6"/>
 			<label kind="guard" x="663" y="68">x&gt;= waiting</label>
 			<label kind="assignment" x="663" y="85">x=0</label>
 		</transition>
-		<transition id="id25">
+		<transition id="id27">
 			<source ref="id3"/>
 			<target ref="id5"/>
 			<label kind="synchronisation" x="178" y="0">assistDone[id]?</label>
 			<label kind="assignment" x="161" y="17">x=0,setWaiting(pos[id])</label>
 		</transition>
-		<transition id="id26">
+		<transition id="id28">
 			<source ref="id3"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-68" y="-161">!isNeedNear(pos[id])</label>
@@ -593,7 +611,7 @@ void setFRFree(int id){
 			<nail x="-42" y="-119"/>
 			<nail x="85" y="-119"/>
 		</transition>
-		<transition id="id27">
+		<transition id="id29">
 			<source ref="id3"/>
 			<target ref="id4"/>
 			<label kind="guard" x="-306" y="-25">isNeedNear(pos[id])</label>
@@ -681,6 +699,7 @@ bool isFirstResponderNear(int id) {
     return false;
 }
 
+
 /**
  * @brief Moves a civilian to the nearest side of the grid if the next cell is not near the fire.
  *
@@ -747,6 +766,7 @@ void move(int id) { //todo improve this by making the civilian walk along the ed
             grid[new_y][new_x] = SURVIVOR; //update the grid
         }
     }
+    
 }
 
 
@@ -825,205 +845,219 @@ void setSurvFree(int id){
 }
 
 </declaration>
-		<location id="id28" x="-493" y="-68">
+		<location id="id30" x="-493" y="-68">
 			<name x="-544" y="-59">Initial</name>
 			<committed/>
 		</location>
-		<location id="id29" x="-926" y="-68">
+		<location id="id31" x="-926" y="-68">
 			<name x="-960" y="-102">InNeed</name>
 			<label kind="invariant" x="-936" y="-51">x&lt;=Tv</label>
 		</location>
-		<location id="id30" x="-102" y="-68">
+		<location id="id32" x="-102" y="-68">
 			<name x="-136" y="-102">Survivor</name>
 			<label kind="invariant" x="-112" y="-51">x&lt;=Tv</label>
 		</location>
-		<location id="id31" x="-238" y="110">
+		<location id="id33" x="-238" y="110">
 			<name x="-263" y="76">Saved</name>
 		</location>
-		<location id="id32" x="238" y="-68">
+		<location id="id34" x="238" y="-68">
 			<name x="179" y="-102">ZeroResponder</name>
 			<label kind="invariant" x="195" y="-59">x &lt;= waitingHelping</label>
 		</location>
-		<location id="id33" x="-926" y="-229">
+		<location id="id35" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
-		<location id="id34" x="238" y="110">
+		<location id="id36" x="238" y="110">
 			<label kind="invariant" x="255" y="101">x &lt;= Tzr</label>
 		</location>
-		<location id="id35" x="-501" y="-161">
+		<location id="id37" x="-501" y="-161">
 			<name x="-511" y="-195">Initializer</name>
 		</location>
-		<location id="id36" x="858" y="-467">
+		<location id="id38" x="858" y="-467">
 			<name x="756" y="-501">CallingFirstResponder</name>
 			<label kind="invariant" x="799" y="-450">x &lt;= waitingFR</label>
 		</location>
-		<location id="id37" x="858" y="-127">
+		<location id="id39" x="858" y="-127">
 			<name x="875" y="-152">ReachedFirstResponder</name>
 		</location>
-		<location id="id38" x="238" y="-255">
+		<location id="id40" x="238" y="-255">
 			<committed/>
 		</location>
-		<branchpoint id="id39" x="68" y="-34"/>
-		<branchpoint id="id40" x="-102" y="-365"/>
-		<init ref="id35"/>
-		<transition id="id41">
-			<source ref="id30"/>
-			<target ref="id31"/>
+		<location id="id41" x="-102" y="-314">
+			<committed/>
+		</location>
+		<location id="id42" x="25" y="-42">
+			<committed/>
+		</location>
+		<branchpoint id="id43" x="68" y="-34"/>
+		<branchpoint id="id44" x="-102" y="-365"/>
+		<init ref="id37"/>
+		<transition id="id45">
+			<source ref="id42"/>
+			<target ref="id43"/>
+		</transition>
+		<transition id="id46">
+			<source ref="id32"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="-76" y="-85">assist[id]?</label>
+		</transition>
+		<transition id="id47">
+			<source ref="id41"/>
+			<target ref="id44"/>
+		</transition>
+		<transition id="id48">
+			<source ref="id32"/>
+			<target ref="id41"/>
+			<label kind="synchronisation" x="-306" y="-280">callFirstResponder[id]?</label>
+		</transition>
+		<transition id="id49">
+			<source ref="id32"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-153" y="17">x&gt;=Tv</label>
-			<label kind="assignment" x="-246" y="34">grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="-246" y="34">grid[pos[id].y][pos[id].x] = EMPTY, n_safe=n_safe+1</label>
 			<nail x="-161" y="51"/>
 			<nail x="-238" y="76"/>
 		</transition>
-		<transition id="id42">
-			<source ref="id39"/>
-			<target ref="id32"/>
+		<transition id="id50">
+			<source ref="id43"/>
+			<target ref="id34"/>
 			<label kind="assignment" x="86" y="-51">x=0, setWaiting()</label>
 			<label kind="probability" x="86" y="-34">Pr</label>
 		</transition>
-		<transition id="id43">
-			<source ref="id39"/>
-			<target ref="id30"/>
+		<transition id="id51">
+			<source ref="id43"/>
+			<target ref="id32"/>
 			<label kind="assignment" x="1" y="-4">setSurvFree(id)</label>
 			<label kind="probability" x="1" y="13">100-Pr</label>
 			<nail x="-17" y="25"/>
 			<nail x="-110" y="0"/>
 		</transition>
-		<transition id="id44">
-			<source ref="id30"/>
-			<target ref="id39"/>
-			<label kind="synchronisation" x="-51" y="-76">assist[id]?</label>
-		</transition>
-		<transition id="id45">
-			<source ref="id40"/>
-			<target ref="id30"/>
+		<transition id="id52">
+			<source ref="id44"/>
+			<target ref="id32"/>
 			<label kind="assignment" x="-408" y="-433">setSurvFree(id)</label>
 			<label kind="probability" x="-170" y="-365">1-Pr</label>
 			<nail x="-340" y="-416"/>
 			<nail x="-433" y="-314"/>
 			<nail x="-127" y="-187"/>
 		</transition>
-		<transition id="id46">
-			<source ref="id40"/>
-			<target ref="id36"/>
+		<transition id="id53">
+			<source ref="id44"/>
+			<target ref="id38"/>
 			<label kind="assignment" x="-84" y="-475">x=0, setWaitingfr()</label>
 			<label kind="probability" x="-84" y="-458">Pr</label>
 			<nail x="-102" y="-484"/>
 		</transition>
-		<transition id="id47">
-			<source ref="id30"/>
-			<target ref="id40"/>
-			<label kind="synchronisation" x="-314" y="-297">callFirstResponder[id]?</label>
-		</transition>
-		<transition id="id48">
-			<source ref="id37"/>
-			<target ref="id31"/>
+		<transition id="id54">
+			<source ref="id39"/>
+			<target ref="id33"/>
 			<label kind="synchronisation" x="221" y="178">assistDone[id]?</label>
-			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY</label>
+			<label kind="assignment" x="144" y="195">x=0,grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="858" y="170"/>
 			<nail x="-136" y="170"/>
 		</transition>
-		<transition id="id49">
-			<source ref="id37"/>
-			<target ref="id38"/>
+		<transition id="id55">
+			<source ref="id39"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="510" y="-187">wrong[id]?</label>
 			<label kind="assignment" x="493" y="-170">setSurvFree(id)</label>
 			<nail x="645" y="-191"/>
 			<nail x="331" y="-191"/>
 		</transition>
-		<transition id="id50">
-			<source ref="id38"/>
-			<target ref="id30"/>
+		<transition id="id56">
+			<source ref="id40"/>
+			<target ref="id32"/>
 			<label kind="assignment" x="-59" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 			<nail x="0" y="-255"/>
 		</transition>
-		<transition id="id51">
-			<source ref="id32"/>
-			<target ref="id38"/>
+		<transition id="id57">
+			<source ref="id34"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="102" y="-161">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="255" y="-144">setSurvFree(id)</label>
 			<nail x="238" y="-153"/>
 		</transition>
-		<transition id="id52">
-			<source ref="id35"/>
-			<target ref="id28"/>
+		<transition id="id58">
+			<source ref="id37"/>
+			<target ref="id30"/>
 			<label kind="synchronisation" x="-578" y="-153">starting?</label>
 		</transition>
-		<transition id="id53">
-			<source ref="id34"/>
-			<target ref="id31"/>
+		<transition id="id59">
+			<source ref="id36"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
 			<label kind="assignment" x="-195" y="68">x = 0,
-grid[pos[id].y][pos[id].x] = EMPTY</label>
+grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 		</transition>
-		<transition id="id54">
-			<source ref="id32"/>
-			<target ref="id34"/>
+		<transition id="id60">
+			<source ref="id34"/>
+			<target ref="id36"/>
 			<label kind="guard" x="246" y="-8">x&gt;= waitingHelping</label>
 			<label kind="synchronisation" x="246" y="26">assistDone[getIdFromPosCivilian(helping[id])]!</label>
 			<label kind="assignment" x="246" y="9">x=0</label>
 		</transition>
-		<transition id="id55">
-			<source ref="id30"/>
-			<target ref="id28"/>
-			<label kind="assignment" x="-391" y="-178">move(id), n_safe=n_safe-1</label>
+		<transition id="id61">
+			<source ref="id32"/>
+			<target ref="id30"/>
+			<label kind="assignment" x="-391" y="-178">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
-		<transition id="id56">
-			<source ref="id29"/>
-			<target ref="id31"/>
+		<transition id="id62">
+			<source ref="id31"/>
+			<target ref="id33"/>
 			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
 			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, n_safe=n_safe+1</label>
 			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
 			<nail x="-902" y="110"/>
 		</transition>
-		<transition id="id57">
-			<source ref="id29"/>
-			<target ref="id33"/>
+		<transition id="id63">
+			<source ref="id31"/>
+			<target ref="id35"/>
 			<label kind="guard" x="-918" y="-195">x &gt;= Tv</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY, x=0</label>
 		</transition>
-		<transition id="id58">
-			<source ref="id28"/>
-			<target ref="id31"/>
+		<transition id="id64">
+			<source ref="id30"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-637" y="25">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="-433" y="34"/>
 		</transition>
-		<transition id="id59">
-			<source ref="id28"/>
-			<target ref="id30"/>
+		<transition id="id65">
+			<source ref="id30"/>
+			<target ref="id32"/>
 			<label kind="guard" x="-442" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
 !isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR,n_safe=n_safe+1</label>
+			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 		</transition>
-		<transition id="id60">
-			<source ref="id28"/>
-			<target ref="id29"/>
+		<transition id="id66">
+			<source ref="id30"/>
+			<target ref="id31"/>
 			<label kind="guard" x="-841" y="-110">isFireNear(pos[id].x, pos[id].y) &amp;&amp;
 !isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-841" y="-59">grid[pos[id].y][pos[id].x] = NEED</label>
 			<nail x="-595" y="-67"/>
 		</transition>
-		<transition id="id61">
-			<source ref="id37"/>
-			<target ref="id38"/>
+		<transition id="id67">
+			<source ref="id39"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="288" y="-254">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="374" y="-238">setSurvFree(id)</label>
 			<nail x="705" y="-254"/>
 		</transition>
-		<transition id="id62">
-			<source ref="id36"/>
-			<target ref="id38"/>
+		<transition id="id68">
+			<source ref="id38"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="229" y="-398">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="357" y="-416">setSurvFree(id)</label>
 			<nail x="739" y="-373"/>
 			<nail x="365" y="-373"/>
 		</transition>
-		<transition id="id63">
-			<source ref="id36"/>
-			<target ref="id37"/>
+		<transition id="id69">
+			<source ref="id38"/>
+			<target ref="id39"/>
 			<label kind="guard" x="867" y="-340">x &gt;= waitingFR</label>
 			<label kind="synchronisation" x="867" y="-297">assistDone[idFRtoCall]!</label>
 			<label kind="assignment" x="867" y="-323">setWaiting()</label>
@@ -1032,7 +1066,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	<template>
 		<name x="5" y="5">Drone</name>
 		<parameter>const id_dr id,int Pf</parameter>
-		<declaration>
+		<declaration>clock x;
 /*
     Acronyms:
     PNA =&gt; person in need of assistance
@@ -1240,95 +1274,97 @@ void resetData(){
 
 
 </declaration>
-		<location id="id64" x="-526" y="-8">
+		<location id="id70" x="-526" y="-8">
 			<name x="-560" y="-42">Initializer</name>
+			<urgent/>
 		</location>
-		<location id="id65" x="348" y="144">
+		<location id="id71" x="348" y="144">
 			<name x="365" y="136">Instruct_ZR_Help</name>
 		</location>
-		<location id="id66" x="170" y="-8">
+		<location id="id72" x="170" y="-8">
 			<name x="195" y="-17">Search_closest_responder</name>
 			<committed/>
 		</location>
-		<location id="id67" x="357" y="-153">
+		<location id="id73" x="357" y="-153">
 			<name x="382" y="-161">Instruct_ZR_Call_FR</name>
+			<label kind="invariant" x="347" y="-136">x&lt;=1</label>
 		</location>
-		<location id="id68" x="-110" y="-8">
+		<location id="id74" x="-110" y="-8">
 			<name x="-161" y="17">PNA_Detected</name>
 			<committed/>
 		</location>
-		<location id="id69" x="-399" y="-8">
+		<location id="id75" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<branchpoint id="id70" x="-246" y="-8"/>
-		<init ref="id64"/>
-		<transition id="id71">
-			<source ref="id70"/>
-			<target ref="id69"/>
+		<branchpoint id="id76" x="-246" y="-8"/>
+		<init ref="id70"/>
+		<transition id="id77">
+			<source ref="id76"/>
+			<target ref="id75"/>
 			<label kind="probability" x="-314" y="68">Pf</label>
 			<nail x="-272" y="85"/>
 		</transition>
-		<transition id="id72">
-			<source ref="id70"/>
-			<target ref="id68"/>
+		<transition id="id78">
+			<source ref="id76"/>
+			<target ref="id74"/>
 			<label kind="probability" x="-221" y="-8">100-Pf</label>
 		</transition>
-		<transition id="id73">
-			<source ref="id69"/>
-			<target ref="id70"/>
+		<transition id="id79">
+			<source ref="id75"/>
+			<target ref="id76"/>
 			<label kind="guard" x="-357" y="-34">isPNANearby()</label>
 		</transition>
-		<transition id="id74">
-			<source ref="id65"/>
-			<target ref="id69"/>
+		<transition id="id80">
+			<source ref="id71"/>
+			<target ref="id75"/>
 			<label kind="assignment" x="-102" y="246">resetData()</label>
 			<nail x="229" y="280"/>
 			<nail x="-255" y="280"/>
 			<nail x="-408" y="136"/>
 		</transition>
-		<transition id="id75">
-			<source ref="id67"/>
-			<target ref="id69"/>
-			<label kind="assignment" x="-85" y="-280">resetData()</label>
+		<transition id="id81">
+			<source ref="id73"/>
+			<target ref="id75"/>
+			<label kind="assignment" x="-85" y="-280">resetData(),x=0</label>
 			<nail x="229" y="-297"/>
 			<nail x="-255" y="-297"/>
 			<nail x="-399" y="-161"/>
 		</transition>
-		<transition id="id76">
-			<source ref="id68"/>
-			<target ref="id69"/>
+		<transition id="id82">
+			<source ref="id74"/>
+			<target ref="id75"/>
 			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
 			<label kind="assignment" x="-331" y="-187">resetData()</label>
 			<nail x="-272" y="-144"/>
 		</transition>
-		<transition id="id77">
-			<source ref="id69"/>
-			<target ref="id69"/>
+		<transition id="id83">
+			<source ref="id75"/>
+			<target ref="id75"/>
 			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
 			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
 			<nail x="-544" y="51"/>
 			<nail x="-484" y="110"/>
 		</transition>
-		<transition id="id78">
-			<source ref="id68"/>
-			<target ref="id66"/>
+		<transition id="id84">
+			<source ref="id74"/>
+			<target ref="id72"/>
 			<label kind="guard" x="-51" y="-42">isSurvNearby()</label>
 		</transition>
-		<transition id="id79">
-			<source ref="id64"/>
-			<target ref="id69"/>
+		<transition id="id85">
+			<source ref="id70"/>
+			<target ref="id75"/>
 		</transition>
-		<transition id="id80">
-			<source ref="id66"/>
-			<target ref="id65"/>
+		<transition id="id86">
+			<source ref="id72"/>
+			<target ref="id71"/>
 			<label kind="guard" x="93" y="110">!isFRNearby()</label>
 			<label kind="synchronisation" x="93" y="93">assist[idSurv]!</label>
 			<label kind="assignment" x="76" y="127">setSurvBusyHelping()</label>
 		</transition>
-		<transition id="id81">
-			<source ref="id66"/>
-			<target ref="id67"/>
+		<transition id="id87">
+			<source ref="id72"/>
+			<target ref="id73"/>
 			<label kind="guard" x="102" y="-153">isFRNearby()</label>
 			<label kind="synchronisation" x="42" y="-170">callFirstResponder[idSurv]!</label>
 			<label kind="assignment" x="68" y="-136">setSurvBusyCalling(),
@@ -1364,98 +1400,10 @@ system C1,C2,C3,C4,C5,C6,C7,C8,C0, F9,F10,F11,F12, Initializer,D1,D2,D0;
 		<option key="--statespace-consumption" value="2"/>
 		<option key="--diagnostic" value="0"/>
 		<query>
-			<formula>Pr[&lt;=300] (&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100)))</formula>
+			<formula>Pr[&lt;=100] (&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100)))</formula>
 			<comment/>
-			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2024-07-11 12:19:16 +0200">
-				<option key="--statespace-consumption" value="2"/>
-				<option key="--diagnostic" value="0"/>
-				<details>≥ 0.950056 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
-					<series title="density" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,4.503599627370496E15
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,4.503599627370496E15
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
-					<series title="upper limit" type="b(0.000000)" color="0xa0a0ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="lower limit" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,0.9500559162941453
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,4.503599627370496E15
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
-					<series title="probability" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
-					<series title="upper limit" type="b(0.000000)" color="0xa0a0ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="lower limit" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,0.9500559162941453
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.04994408370585468
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
-					<series title="count" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,72.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,72.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-			</result>
+			<option key="--statespace-consumption" value="2"/>
+			<option key="--diagnostic" value="0"/>
 		</query>
 		<query>
 			<formula>Pr[&lt;=60] (&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100)))</formula>
@@ -1554,96 +1502,6 @@ Mean estimate of displayed sample: ≈ 0</comment>
 		<query>
 			<formula>Pr[&lt;=20] (&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100)))</formula>
 			<comment/>
-			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2024-07-11 12:17:44 +0200">
-				<option key="--statespace-consumption" value="2"/>
-				<option key="--diagnostic" value="0"/>
-				<details>≥ 0.950056 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="run duration in time" yaxis="probability density">
-					<series title="density" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,4.503599627370496E15
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,4.503599627370496E15
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Density Confidence Intervals" xaxis="run duration in time" yaxis="probability density">
-					<series title="upper limit" type="b(0.000000)" color="0xa0a0ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="lower limit" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,0.9500559162941453
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,4.503599627370496E15
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="run duration in time" yaxis="probability">
-					<series title="probability" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
-					<series title="upper limit" type="b(0.000000)" color="0xa0a0ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="lower limit" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,0.9500559162941453
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="run duration in time" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="run duration in time" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.04994408370585468
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="run duration in time" yaxis="count">
-					<series title="count" type="b(0.000000)" color="0x0000ff" encoding="csv">0.0,72.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,72.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
-Runs: 72 in total, 72 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
@@ -1656,21 +1514,26 @@ Mean estimate of displayed sample: ≈ 0</comment>
 		<query>
 			<formula>A&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-07-11 11:34:02 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-11 16:48:35 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
 		<query>
-			<formula>Pr[&lt;= 60] ([] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
+			<formula>Pr[&lt;=5000] ([] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
 </formula>
 			<comment/>
+			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2024-07-11 16:48:50 +0200">
+				<option key="--statespace-consumption" value="2"/>
+				<option key="--diagnostic" value="0"/>
+				<details>≤ 0.0499441 (95% CI)</details>
+			</result>
 		</query>
 		<query>
-			<formula>Pr[&lt;= 60] (&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
+			<formula>Pr[&lt;= 5000] (&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
 </formula>
 			<comment/>
-			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2024-07-11 12:11:58 +0200">
+			<result outcome="success" type="interval" value="≥ 0.950056 (95% CI)" timestamp="2024-07-11 16:34:53 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 				<details>≥ 0.950056 (95% CI)</details>
