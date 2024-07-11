@@ -33,8 +33,8 @@ const pos_t  DEF_POS = {-1, -1};
 
 /********* VERIFICATION PARAMETERS *******************/
 
-int Tscs = 15;
-int N_perc = 60;   // meaning 30%
+int Tscs = 24;
+int N_perc = 30;   // meaning 30%
 
 /********* VERIFICATION VARIABLES *******************/
 
@@ -245,8 +245,6 @@ int getIdFromPosFirstResponder(pos_t posFR){
 		<name>FirstResponder</name>
 		<parameter>const id_fr id,int Tfr</parameter>
 		<declaration>clock x;
-int id_chan;
-
 int idRescuing; // id person we're rescuing
 int waiting; // distance from person in need when zr called
 int zrToCommTo; // id zr to contact when finishing Tfr
@@ -914,7 +912,7 @@ void setSurvFree(int id){
 			<source ref="id32"/>
 			<target ref="id33"/>
 			<label kind="guard" x="-153" y="17">x&gt;=Tv</label>
-			<label kind="assignment" x="-246" y="34">grid[pos[id].y][pos[id].x] = EMPTY, n_safe=n_safe+1</label>
+			<label kind="assignment" x="-246" y="34">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="-161" y="51"/>
 			<nail x="-238" y="76"/>
 		</transition>
@@ -1287,7 +1285,7 @@ void resetData(){
 		</location>
 		<location id="id73" x="357" y="-153">
 			<name x="382" y="-161">Instruct_ZR_Call_FR</name>
-			<label kind="invariant" x="347" y="-136">x&lt;=1</label>
+			<label kind="invariant" x="347" y="-136">x&lt;=2</label>
 		</location>
 		<location id="id74" x="-110" y="-8">
 			<name x="-161" y="17">PNA_Detected</name>
@@ -1326,7 +1324,7 @@ void resetData(){
 		<transition id="id81">
 			<source ref="id73"/>
 			<target ref="id75"/>
-			<label kind="assignment" x="-85" y="-280">resetData(),x=0</label>
+			<label kind="assignment" x="-85" y="-280">resetData(), x=0</label>
 			<nail x="229" y="-297"/>
 			<nail x="-255" y="-297"/>
 			<nail x="-399" y="-161"/>
@@ -1523,7 +1521,7 @@ Mean estimate of displayed sample: ≈ 0</comment>
 			<formula>Pr[&lt;=5000] ([] (global_time &lt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
 </formula>
 			<comment/>
-			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2024-07-11 16:48:50 +0200">
+			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2024-07-11 18:13:45 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 				<details>≤ 0.0499441 (95% CI)</details>

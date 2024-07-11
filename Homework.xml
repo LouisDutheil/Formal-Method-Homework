@@ -331,6 +331,17 @@ void saveIdRescuing(pos_t posResc){
     }
 }
 
+bool isInCalling(){
+   pos_t posFR = pos[id];
+   int i;
+   for(i=0;i&lt;N_CIVILIANS;i++){
+      if(calling[i] == posFR){
+            return true;   
+     }
+    }
+    return false;
+}
+
 /**
  * @brief Moves a first responder to the center of the grid
  *
@@ -352,10 +363,14 @@ void move(int id) {
     int dist_bottom = GRID_H - 1 - current_y;
     int dist_left = current_x;
     int dist_right = GRID_W - 1 - current_x;
+    bool change;
 
     // Determine the direction going near the center
     int max_dist = 0;
     int direction = 0; // 0 for top, 1 for bottom, 2 for left, 3 for right
+
+    if(isInCalling()){  change=1;}
+    else change=0;
 
     if (dist_top &gt; max_dist &amp;&amp; grid[current_y - 1][current_x]!= FIRE ) {
         max_dist = dist_top;
@@ -394,7 +409,7 @@ void move(int id) {
     }
 
     // Check if the new position is valid and not near fire
-    if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H) {
+    if (new_x &gt;= 0 &amp;&amp; new_x &lt; GRID_W &amp;&amp; new_y &gt;= 0 &amp;&amp; new_y &lt; GRID_H &amp;&amp; change==0) {
         if (grid[new_y][new_x] == EMPTY) {
             pos[id].x = new_x;
             pos[id].y = new_y;
@@ -402,6 +417,7 @@ void move(int id) {
             grid[new_y][new_x] = FIRST_RESPONDER; //update the grid
         }
     }
+    
 }
 
 /**
@@ -464,6 +480,7 @@ void setFRFree(int id){
 }</declaration>
 		<location id="id3" x="8" y="0">
 			<name x="-2" y="-34">Initial</name>
+			<label kind="invariant" x="-2" y="17">x&lt;=Tv</label>
 		</location>
 		<location id="id4" x="-391" y="0">
 			<name x="-442" y="-34">Rescue_person</name>
@@ -492,12 +509,13 @@ void setFRFree(int id){
 		</location>
 		<location id="id12" x="229" y="-187">
 			<name x="219" y="-221">End</name>
-			<label kind="invariant" x="170" y="-170">global_time &gt; Tv</label>
+			<label kind="invariant" x="170" y="-170">global_time &gt;= Tv</label>
 		</location>
 		<init ref="id7"/>
 		<transition id="id13">
 			<source ref="id3"/>
 			<target ref="id12"/>
+			<label kind="guard" x="119" y="-127">x&gt;=Tv</label>
 		</transition>
 		<transition id="id14">
 			<source ref="id6"/>
@@ -1340,6 +1358,7 @@ system C1,C2,C3,C4,C5,C6,C7,C8,C0, F9,F10,F11,F12, Initializer,D1,D2,D0;
 
 </system>
 	<queries>
+		<option key="--statespace-consumption" value="2"/>
 		<option key="--diagnostic" value="0"/>
 		<query>
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
