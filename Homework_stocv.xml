@@ -21,10 +21,9 @@ const int CIVILIAN = 8;
 const int GRID_W = 10; //grid width
 const int GRID_H = 10; //grid height
 const int N_CIVILIANS = 9;  // Total number of civilians
-const int N_DRONES = 2; //Total number of drones 
+const int N_DRONES = 3; //Total number of drones 
 const int N_FR = 4; // Total number of first responders
 const int Tv = 20; //time for the civilian to die close to a fire
-const int Tfr = 5; //time to save a person
 const int Nv = 1; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[0,N_DRONES-1] id_dr;
@@ -61,12 +60,12 @@ pos_t FRHelping[N_FR];      // same principles for first responders
 
 /*** CHANNELS *************************************/
 
-chan assist[N_CIVILIANS]; // Channel used by drones to request survivors to assist
-chan callFirstResponder[N_CIVILIANS]; //Channel used by drones to request survivors to call a first responder to help a person in need
-chan assistDone[N_CIVILIANS+N_FR]; // Channel used by civilian when they're saved by a zero responder/first responder
+broadcast chan assist[N_CIVILIANS]; // Channel used by drones to request survivors to assist
+broadcast chan callFirstResponder[N_CIVILIANS]; //Channel used by drones to request survivors to call a first responder to help a person in need
+broadcast chan assistDone[N_CIVILIANS+N_FR]; // Channel used by civilian when they're saved by a zero responder/first responder
 broadcast chan starting;    // channel used from the initializer
 broadcast chan dead[N_CIVILIANS];  // each victim use it to advise in case of death
-chan wrong[N_CIVILIANS];
+broadcast chan wrong[N_CIVILIANS];
 
 /*** CHANNELS *************************************/
 
@@ -173,8 +172,8 @@ void initializeGrid() {
 
     //Place Drones
     placeEntity(0, 1, 0, DRONE);
-    //placeEntity(1, 4, 0, DRONE);
-    placeEntity(1, 7, 0, DRONE);
+    placeEntity(1, 4, 0, DRONE);
+    placeEntity(2, 7, 0, DRONE);
     //command to initialize the drone automata with its coordinates
 
     initCallingHelping();
@@ -244,17 +243,10 @@ int getIdFromPosFirstResponder(pos_t posFR){
 	</template>
 	<template>
 		<name>FirstResponder</name>
-		<parameter>const id_fr id</parameter>
+		<parameter>const id_fr id,int Tfr</parameter>
 		<declaration>clock x;
-int Tfr;
 int id_chan;
 
-void setTfr(){
-    Tfr= id-4;
-    if(Tfr&gt;5){
-    Tfr= abs(id-7);
-    } 
-}
 
 
 int idRescuing; // id person we're rescuing
@@ -473,6 +465,7 @@ void setFRFree(int id){
 		</location>
 		<location id="id4" x="-391" y="0">
 			<name x="-442" y="-34">Rescue_person</name>
+			<label kind="invariant" x="-416" y="17">x&lt;=Tfr</label>
 		</location>
 		<location id="id5" x="654" y="0">
 			<name x="644" y="-34">Called</name>
@@ -513,7 +506,7 @@ void setFRFree(int id){
 		<transition id="id14">
 			<source ref="id9"/>
 			<target ref="id11"/>
-			<label kind="guard" x="-297" y="-280">x==Tfr &amp;&amp; !differentPerson()</label>
+			<label kind="guard" x="-297" y="-280">x&gt;=Tfr &amp;&amp; !differentPerson()</label>
 			<label kind="synchronisation" x="-289" y="-263">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="-272" y="-246">x=0,setFRFree(id)</label>
 		</transition>
@@ -534,7 +527,7 @@ void setFRFree(int id){
 		<transition id="id17">
 			<source ref="id9"/>
 			<target ref="id5"/>
-			<label kind="guard" x="204" y="-331">x==Tfr &amp;&amp; differentPerson()</label>
+			<label kind="guard" x="204" y="-331">x&gt;=Tfr &amp;&amp; differentPerson()</label>
 			<label kind="synchronisation" x="178" y="-314">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="178" y="-289">x=0</label>
 			<nail x="654" y="-289"/>
@@ -579,7 +572,6 @@ void setFRFree(int id){
 			<source ref="id7"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="110" y="-68">starting?</label>
-			<label kind="assignment" x="110" y="-51">setTfr()</label>
 		</transition>
 		<transition id="id24">
 			<source ref="id5"/>
@@ -610,23 +602,11 @@ void setFRFree(int id){
 	</template>
 	<template>
 		<name>Civilian</name>
-		<parameter>const id_zr id</parameter>
+		<parameter>const id_zr id,int Tzr,int Pr</parameter>
 		<declaration>clock x;
 int waitingHelping;
 int waitingFR;
 int idFRtoCall; //id of the first responder the current civilian is calling
-int Tzr;
-double Pr;
-/**
- * @brief set the time it takes for a specific survivor to help a person in need once reached
- */
-void setTzr(){
-    Tzr= 2+id;
-    if(Tzr&gt;5){
-    Tzr= abs(id-5);
-    } 
-}
-
 
 /**
  * @brief Checks if a position is valid within the grid bounds.
@@ -790,7 +770,6 @@ int calculateDistance(int id, pos_t dest) {
 
     // Calculate Manhattan distance
     distance = abs(current_pos.x - dest.x) + abs(current_pos.y - dest.y);
-
     return distance;
 }
 
@@ -896,7 +875,7 @@ void setSurvFree(int id){
 			<source ref="id39"/>
 			<target ref="id30"/>
 			<label kind="assignment" x="1" y="-4">setSurvFree(id)</label>
-			<label kind="probability" x="1" y="13">1-Pr</label>
+			<label kind="probability" x="1" y="13">100-Pr</label>
 			<nail x="-17" y="25"/>
 			<nail x="-110" y="0"/>
 		</transition>
@@ -959,7 +938,6 @@ void setSurvFree(int id){
 			<source ref="id35"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="-578" y="-153">starting?</label>
-			<label kind="assignment" x="-569" y="-136">setTzr()</label>
 		</transition>
 		<transition id="id52">
 			<source ref="id34"/>
@@ -1044,7 +1022,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	</template>
 	<template>
 		<name x="5" y="5">Drone</name>
-		<parameter>const id_dr id</parameter>
+		<parameter>const id_dr id,int Pf</parameter>
 		<declaration>
 /*
     Acronyms:
@@ -1054,8 +1032,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 // Place local declarations here.
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
-pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-double Pf;    
+pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS; 
 
 /**
  * @brief Check if the detected survivor is available 
@@ -1286,7 +1263,7 @@ void resetData(){
 		<transition id="id71">
 			<source ref="id69"/>
 			<target ref="id67"/>
-			<label kind="probability" x="-221" y="-8">1-Pf</label>
+			<label kind="probability" x="-221" y="-8">100-Pf</label>
 		</transition>
 		<transition id="id72">
 			<source ref="id68"/>
@@ -1352,25 +1329,51 @@ setFRBusyHelping()</label>
 	<system>// Place template instantiations here.
 // List one or more processes to be composed into a system.
 // System Declaration
-system Civilian, FirstResponder, Initializer,Drone;
+C0:=Civilian(0,2,30);
+C1:=Civilian(1,1,40);
+C2:=Civilian(2,4,30);
+C3:=Civilian(3,2,70);
+C4:=Civilian(4,3,40);
+C5:=Civilian(5,2,80);
+C6:=Civilian(6,4,60);
+C7:=Civilian(7,1,70);
+C8:=Civilian(8,5,80);
+
+F9:=FirstResponder(9,2);
+F10:=FirstResponder(10,3);
+F11:=FirstResponder(11,2);
+F12:=FirstResponder(12,4);
+
+D0:=Drone(0,90);
+D1:=Drone(1,50);
+D2:=Drone(2,60);
+
+system C1,C2,C3,C4,C5,C6,C7,C8,C0, F9,F10,F11,F12, Initializer,D1,D2,D0;
 
 </system>
 	<queries>
+		<option key="--statespace-consumption" value="2"/>
 		<option key="--diagnostic" value="0"/>
 		<query>
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-10 16:37:21 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-11 11:19:22 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>A&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-07-10 16:37:24 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-11 11:34:02 +0200">
+				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
+		</query>
+		<query>
+			<formula>Pr[&lt;= 60] (&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100)))
+</formula>
+			<comment/>
 		</query>
 		<query>
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
