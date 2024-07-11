@@ -24,8 +24,8 @@ const int N_CIVILIANS = 9;  // Total number of civilians
 const int N_DRONES = 3; //Total number of drones 
 const int N_FR = 4; // Total number of first responders
 const int Tv = 20; //time for the civilian to die close to a fire
-const int Tfr = 5; //time to save a person
-const int Nv = 1; //Drone detection range
+// todo remove const int Tfr = 5; //time to save a person
+// todo remove const int Nv = 1; //Drone detection range
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[0,N_DRONES-1] id_dr;
 typedef int[N_CIVILIANS,N_CIVILIANS+N_FR-1] id_fr;
@@ -1006,7 +1006,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 	</template>
 	<template>
 		<name x="5" y="5">Drone</name>
-		<parameter>const id_dr id</parameter>
+		<parameter>const id_dr id, int Nv</parameter>
 		<declaration>
 /*
     Acronyms:
@@ -1317,9 +1317,9 @@ F10:=FirstResponder(10,3);
 F11:=FirstResponder(11,2);
 F12:=FirstResponder(12,4);
 
-D0:=Drone(0);
-D1:=Drone(1);
-D2:=Drone(2);
+D0:=Drone(0, 10);
+D1:=Drone(1, 22);
+D2:=Drone(2, 12);
 
 system C1,C2,C3,C4,C5,C6,C7,C8,C0, F9,F10,F11,F12, Initializer,D1,D2,D0;
 
