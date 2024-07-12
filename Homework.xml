@@ -2,24 +2,21 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
+
 const int EMPTY = 0;
 const int FIRE = 1;
 const int EXIT = 2;
-
 const int DRONE = 3;                //drones must not be placed on the grid with other entities because they're supposed to be able to hover over human entities (should not take room in the table)
 const int FIRST_RESPONDER = 4;
-
 const int SURVIVOR = 5;
-const int SAFE = 6;
 const int NEED = 7;
 const int CIVILIAN = 8;
 // const int N = 5;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
-
 const int GRID_W = 5; //grid width
-const int GRID_H = 5; //grid height
+const int GRID_H = 4; //grid height
 const int N_CIVILIANS = 4;  // Total number of civilians
 const int N_DRONES = 2; //Total number of drones 
 const int N_FR = 2; // Total number of first responders
@@ -36,6 +33,7 @@ const pos_t  DEF_POS = {-1, -1};
 
 int Tscs = 10;
 int N_perc = 40;   // meaning 30%
+
 
 /********* VERIFICATION VARIABLES *******************/
 
@@ -55,7 +53,6 @@ pos_t posDrone[N_DRONES];
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t FRHelping[N_FR];      // same principles for first responders  
-
 
 /*********GLOBAL VARIABLES*************************/
 
@@ -93,8 +90,6 @@ void placeEntity(int id, int Y, int X, int entityType){
         posDrone[id].x = X;
         posDrone[id].y = Y;
     }
-    
-
 }
 
 void initCallingHelping(){
@@ -112,7 +107,6 @@ void initFRHelping(){
     }
 }
 
-
 void initializeGrid() {
     // Set all cells to EMPTY initially
     int i;
@@ -123,38 +117,32 @@ void initializeGrid() {
         }
     }
 
-
     // Place exits in predefined positions
-    grid[4][0] = EXIT;
-    grid[4][4] = EXIT;
+    grid[3][0] = EXIT;
+    grid[3][4] = EXIT;
 
-    //Place fire 
+    // Place fire
     grid[1][1] = FIRE;
     grid[1][2] = FIRE;
-    grid[1][3] = FIRE;    
-    grid[2][1] = FIRE;
-    grid[2][3] = FIRE;
-    grid[3][2] = FIRE;
 
-    //Place Civilians
+    // Place Civilians
     placeEntity(0, 0, 1, CIVILIAN);
     placeEntity(1, 0, 3, CIVILIAN);
     placeEntity(2, 2, 0, CIVILIAN);
-    placeEntity(3, 3, 4, CIVILIAN);
+    placeEntity(3, 3, 3, CIVILIAN);
 
-    //Place First Responders
-    placeEntity(4, 3, 0, FIRST_RESPONDER);
-    placeEntity(5, 2, 4, FIRST_RESPONDER);
+    // Place First Responders
+    placeEntity(4, 2, 2, FIRST_RESPONDER);
+    placeEntity(5, 3, 1, FIRST_RESPONDER);
 
-    //Place Drones
+    // Place Drones
     placeEntity(0, 0, 0, DRONE);
-    placeEntity(1, 4, 3, DRONE);
+    placeEntity(1, 3, 4, DRONE);
 
     initCallingHelping();
     initFRHelping();
-    n_safe=0;
+    n_safe = 0;
 }
-
 
 int abs_(int x) {
   if (x &lt; 0) {
@@ -218,9 +206,6 @@ int getIdFromPosFirstResponder(pos_t posFR){
 		<parameter>const id_fr id, int Tfr</parameter>
 		<declaration>clock x;
 int id_chan;
-
-
-
 
 int idRescuing; // id person we're rescuing
 int waiting; // distance from person in need when zr called
@@ -1007,11 +992,11 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
     PNA =&gt; person in need of assistance
 */
 
-// Place local declarations here.
+// local declarations
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-
+bool movingRight, movingUp; //determine if the drone is moving right or up 
 
 /**
  * @brief Check if the detected survivor is available 
@@ -1080,7 +1065,7 @@ void checkSurroundings(int id) {
                 if (cell(newPos) == NEED) {
                     if (!isPNABeingHelped(newPos))
                         posPNA = newPos;
-                } else if (cell(newPos) == SURVIVOR) {
+                } else if (cell(newPos) == SURVIVOR || cell(newPos) == CIVILIAN) {
                     if (isSurvAvailable(getIdFromPosCivilian(newPos))){
                         posSurv = newPos;
                         idSurv = getIdFromPosCivilian(posSurv);
@@ -1096,43 +1081,81 @@ void checkSurroundings(int id) {
     }
 }
 
-
-
 /**
- * @brief Moves the drone in an horizontal line
- * This functions moves the drone on a horizontal patrol route, 
- * The starting direction depends on the drone's initial position  
+ * @brief Moves the drone in a cyclic pattern around its assigned portion of the grid
+ * This function moves the drone in a cyclic patrol route,
+ * covering its assigned portion of the grid efficiently.
  *
  * @param id the drone id
  */
-
 void dronePatrol(int id) {
-    if (posDrone[id].x &lt;= GRID_W/2)
-        isMovingRight = true;
-    else
-        isMovingRight = false;
-    // Check current direction and move accordingly
-    if (isMovingRight) {
-        // Move right
-        if (posDrone[id].x &lt; GRID_W - 1) {
+    // Determine the portion of the grid this drone will patrol
+    int portionSize = GRID_W / N_DRONES;
+    int startX = id * portionSize;
+    int endX = startX + portionSize - 1;
+
+    // Ensure the drone is within its assigned portion
+    if (posDrone[id].x &lt; startX) {
+        posDrone[id].x = startX;
+    } else if (posDrone[id].x &gt; endX) {
+        posDrone[id].x = endX;
+    }
+
+    // Check if the drone is at the right edge of its portion
+    if (movingRight) {
+        if (posDrone[id].x &lt; endX) {
             posDrone[id].x++;
         } else {
-            // Reached the right end, change direction to left
-            isMovingRight = false;
-            posDrone[id].x--;
+            // Reached the right edge, change direction and move vertically
+            movingRight = false;
+            if (movingUp) {
+                if (posDrone[id].y &gt; 0) {
+                    posDrone[id].y--;
+                } else {
+                    movingUp = false;
+                    posDrone[id].y++;
+                }
+            } else {
+                if (posDrone[id].y &lt; GRID_H - 1) {
+                    posDrone[id].y++;
+                } else {
+                    movingUp = true;
+                    posDrone[id].y--;
+                }
+            }
         }
     } else {
-        // Move left
-        if (posDrone[id].x &gt; 0) {
+        // Check if the drone is at the left edge of its portion
+        if (posDrone[id].x &gt; startX) {
             posDrone[id].x--;
         } else {
-            // Reached the left end, change direction to right
-            isMovingRight = true;
-            posDrone[id].x++;
+            // Reached the left edge, change direction and move vertically
+            movingRight = true;
+            if (movingUp) {
+                if (posDrone[id].y &gt; 0) {
+                    posDrone[id].y--;
+                } else {
+                    movingUp = false;
+                    posDrone[id].y++;
+                }
+            } else {
+                if (posDrone[id].y &lt; GRID_H - 1) {
+                    posDrone[id].y++;
+                } else {
+                    movingUp = true;
+                    posDrone[id].y--;
+                }
+            }
         }
     }
+
     checkSurroundings(id);
 }
+
+
+
+
+
 /**
  * @brief Check if a PNA has been detected during the surrouding check using the registered variables pos of each entity
  * 
@@ -1213,91 +1236,68 @@ void resetData(){
 		<location id="id58" x="-526" y="-8">
 			<name x="-560" y="-42">Initializer</name>
 		</location>
-		<location id="id59" x="348" y="144">
-			<name x="365" y="136">Instruct_ZR_Help</name>
-		</location>
-		<location id="id60" x="170" y="-8">
+		<location id="id59" x="170" y="-8">
 			<name x="195" y="-17">Search_closest_responder</name>
+			<committed/>
 		</location>
-		<location id="id61" x="357" y="-153">
-			<name x="382" y="-161">Instruct_ZR_Call_FR</name>
-		</location>
-		<location id="id62" x="-110" y="-8">
+		<location id="id60" x="-110" y="-8">
 			<name x="-161" y="17">PNA_Detected</name>
 			<committed/>
 		</location>
-		<location id="id63" x="-399" y="-8">
+		<location id="id61" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<location id="id64" x="-187" y="110">
-			<name x="-197" y="76">End</name>
-			<label kind="invariant" x="-255" y="127">global_time &gt; Tv</label>
-		</location>
 		<init ref="id58"/>
-		<transition id="id65">
-			<source ref="id63"/>
-			<target ref="id64"/>
+		<transition id="id62">
+			<source ref="id58"/>
+			<target ref="id61"/>
 		</transition>
-		<transition id="id66">
-			<source ref="id59"/>
-			<target ref="id63"/>
-			<label kind="assignment" x="-102" y="246">resetData()</label>
-			<nail x="229" y="280"/>
-			<nail x="-255" y="280"/>
-			<nail x="-408" y="136"/>
+		<transition id="id63">
+			<source ref="id60"/>
+			<target ref="id61"/>
+			<label kind="guard" x="-306" y="-136">!isSurvNearby()</label>
+			<label kind="assignment" x="-289" y="-153">resetData()</label>
+			<nail x="-238" y="-102"/>
 		</transition>
-		<transition id="id67">
+		<transition id="id64">
 			<source ref="id61"/>
-			<target ref="id63"/>
-			<label kind="assignment" x="-85" y="-280">resetData()</label>
-			<nail x="229" y="-297"/>
-			<nail x="-255" y="-297"/>
-			<nail x="-399" y="-161"/>
-		</transition>
-		<transition id="id68">
-			<source ref="id62"/>
-			<target ref="id63"/>
-			<label kind="guard" x="-348" y="-170">!isSurvNearby()</label>
-			<label kind="assignment" x="-331" y="-187">resetData()</label>
-			<nail x="-272" y="-144"/>
-		</transition>
-		<transition id="id69">
-			<source ref="id63"/>
-			<target ref="id63"/>
+			<target ref="id61"/>
 			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
 			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
 			<nail x="-544" y="51"/>
 			<nail x="-484" y="110"/>
 		</transition>
-		<transition id="id70">
-			<source ref="id63"/>
-			<target ref="id62"/>
-			<label kind="guard" x="-331" y="-42">isPNANearby()</label>
-		</transition>
-		<transition id="id71">
-			<source ref="id62"/>
+		<transition id="id65">
+			<source ref="id61"/>
 			<target ref="id60"/>
-			<label kind="guard" x="-51" y="-42">isSurvNearby()</label>
+			<label kind="guard" x="-306" y="-34">isPNANearby()</label>
 		</transition>
-		<transition id="id72">
-			<source ref="id58"/>
-			<target ref="id63"/>
-		</transition>
-		<transition id="id73">
+		<transition id="id66">
 			<source ref="id60"/>
 			<target ref="id59"/>
-			<label kind="guard" x="93" y="110">!isFRNearby()</label>
-			<label kind="synchronisation" x="93" y="93">assist[idSurv]!</label>
-			<label kind="assignment" x="76" y="127">setSurvBusyHelping()</label>
+			<label kind="guard" x="-34" y="-34">isSurvNearby()</label>
 		</transition>
-		<transition id="id74">
-			<source ref="id60"/>
+		<transition id="id67">
+			<source ref="id59"/>
 			<target ref="id61"/>
-			<label kind="guard" x="102" y="-153">isFRNearby()</label>
-			<label kind="synchronisation" x="42" y="-170">callFirstResponder[idSurv]!</label>
-			<label kind="assignment" x="68" y="-136">setSurvBusyCalling(),
-setFRBusyHelping()</label>
+			<label kind="guard" x="-25" y="119">!isFRNearby()</label>
+			<label kind="synchronisation" x="-25" y="102">assist[idSurv]!</label>
+			<label kind="assignment" x="-25" y="136">setSurvBusyHelping(),
+resetData()</label>
+			<nail x="170" y="187"/>
+			<nail x="-399" y="187"/>
+		</transition>
+		<transition id="id68">
+			<source ref="id59"/>
+			<target ref="id61"/>
+			<label kind="guard" x="-68" y="-238">isFRNearby()</label>
+			<label kind="synchronisation" x="-68" y="-255">callFirstResponder[idSurv]!</label>
+			<label kind="assignment" x="-68" y="-221">setSurvBusyCalling(),
+setFRBusyHelping(),
+resetData()</label>
+			<nail x="170" y="-272"/>
+			<nail x="-399" y="-272"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -1311,8 +1311,8 @@ C3 := Civilian(3, 4);
 F4 := FirstResponder(4, 2);
 F5 := FirstResponder(5, 4);
 
-D0 := Drone(0, 10);
-D1 := Drone(1, 22);
+D0 := Drone(0, 4);
+D1 := Drone(1, 4);
 
 system C0, C1, C2, C3, F4, F5, Initializer, D0, D1;
 </system>
@@ -1323,14 +1323,15 @@ system C0, C1, C2, C3, F4, F5, Initializer, D0, D1;
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-12 16:42:35 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-12 18:36:27 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>A&lt;&gt; (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-07-10 16:37:24 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-12 17:36:27 +0200">
+				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
@@ -1338,7 +1339,7 @@ system C0, C1, C2, C3, F4, F5, Initializer, D0, D1;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="success" type="quality" timestamp="2024-07-12 16:42:50 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-12 17:52:14 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
