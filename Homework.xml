@@ -991,7 +991,7 @@ grid[pos[id].y][pos[id].x] = EMPTY</label>
 bool isMovingRight;
 int distZR, distFR, nPNADetected, nSurvivorDetected, idFR = -1, idSurv = -1;
 pos_t posPNA = DEF_POS, posSurv = DEF_POS, posFR = DEF_POS;
-bool movingRight; //determine if the drone is moving right
+bool movingRight, movingUp; //determine if the drone is moving right or up 
 
 /**
  * @brief Check if the detected survivor is available 
@@ -1076,48 +1076,78 @@ void checkSurroundings(int id) {
     }
 }
 
-
-
 /**
- * @brief Moves the drone in a zigzag pattern
- * This function moves the drone in a zigzag patrol route,
- * covering the entire grid efficiently.
+ * @brief Moves the drone in a cyclic pattern around its assigned portion of the grid
+ * This function moves the drone in a cyclic patrol route,
+ * covering its assigned portion of the grid efficiently.
  *
  * @param id the drone id
  */
 void dronePatrol(int id) {
-    // Check if the drone is at the right edge of the grid
+    // Determine the portion of the grid this drone will patrol
+    int portionSize = GRID_W / N_DRONES;
+    int startX = id * portionSize;
+    int endX = startX + portionSize - 1;
+
+    // Ensure the drone is within its assigned portion
+    if (posDrone[id].x &lt; startX) {
+        posDrone[id].x = startX;
+    } else if (posDrone[id].x &gt; endX) {
+        posDrone[id].x = endX;
+    }
+
+    // Check if the drone is at the right edge of its portion
     if (movingRight) {
-        if (posDrone[id].x &lt; GRID_W - 1) {
+        if (posDrone[id].x &lt; endX) {
             posDrone[id].x++;
         } else {
-            // Reached the right edge, move down and change direction
-            if (posDrone[id].y &lt; GRID_H - 1) {
-                posDrone[id].y++;
-                movingRight = false;
+            // Reached the right edge, change direction and move vertically
+            movingRight = false;
+            if (movingUp) {
+                if (posDrone[id].y &gt; 0) {
+                    posDrone[id].y--;
+                } else {
+                    movingUp = false;
+                    posDrone[id].y++;
+                }
             } else {
-                // Reached the bottom edge, change direction
-                movingRight = false;
+                if (posDrone[id].y &lt; GRID_H - 1) {
+                    posDrone[id].y++;
+                } else {
+                    movingUp = true;
+                    posDrone[id].y--;
+                }
             }
         }
     } else {
-        // Check if the drone is at the left edge of the grid
-        if (posDrone[id].x &gt; 0) {
+        // Check if the drone is at the left edge of its portion
+        if (posDrone[id].x &gt; startX) {
             posDrone[id].x--;
         } else {
-            // Reached the left edge, move down and change direction
-            if (posDrone[id].y &lt; GRID_H - 1) {
-                posDrone[id].y++;
-                movingRight = true;
+            // Reached the left edge, change direction and move vertically
+            movingRight = true;
+            if (movingUp) {
+                if (posDrone[id].y &gt; 0) {
+                    posDrone[id].y--;
+                } else {
+                    movingUp = false;
+                    posDrone[id].y++;
+                }
             } else {
-                // Reached the bottom edge, change direction
-                movingRight = true;
+                if (posDrone[id].y &lt; GRID_H - 1) {
+                    posDrone[id].y++;
+                } else {
+                    movingUp = true;
+                    posDrone[id].y--;
+                }
             }
         }
     }
 
     checkSurroundings(id);
 }
+
+
 
 
 
