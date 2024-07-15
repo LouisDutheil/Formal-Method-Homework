@@ -907,91 +907,84 @@ void setSurvFree(int id){
 		</location>
 		<location id="id32" x="238" y="-68">
 			<name x="179" y="-102">ZeroResponder</name>
-			<label kind="invariant" x="195" y="-59">x &lt;= waitingHelping</label>
+			<label kind="invariant" x="136" y="-51">x &lt;= waitingHelping + Tzr</label>
 		</location>
 		<location id="id33" x="-926" y="-229">
 			<name x="-943" y="-263">Dead</name>
 		</location>
-		<location id="id34" x="238" y="110">
-			<label kind="invariant" x="255" y="101">x &lt;= Tzr</label>
-		</location>
-		<location id="id35" x="-501" y="-161">
+		<location id="id34" x="-501" y="-161">
 			<name x="-511" y="-195">Initializer</name>
 		</location>
-		<location id="id36" x="858" y="-467">
+		<location id="id35" x="858" y="-467">
 			<name x="756" y="-501">CallingFirstResponder</name>
 			<label kind="invariant" x="799" y="-450">x &lt;= waitingFR</label>
 		</location>
-		<location id="id37" x="858" y="-127">
+		<location id="id36" x="858" y="-127">
 			<name x="875" y="-152">ReachedFirstResponder</name>
 		</location>
-		<location id="id38" x="238" y="-255">
+		<location id="id37" x="238" y="-255">
 			<committed/>
 		</location>
-		<init ref="id35"/>
-		<transition id="id39">
+		<init ref="id34"/>
+		<transition id="id38">
 			<source ref="id30"/>
 			<target ref="id31"/>
 			<label kind="guard" x="-194" y="17">x&gt;=Tv</label>
-			<label kind="assignment" x="-187" y="-17">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+			<label kind="assignment" x="-272" y="-17">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="-102" y="34"/>
 			<nail x="-212" y="68"/>
 		</transition>
-		<transition id="id40">
-			<source ref="id37"/>
+		<transition id="id39">
+			<source ref="id36"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="221" y="178">assistDone[id]?</label>
 			<label kind="assignment" x="144" y="195">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="858" y="170"/>
 			<nail x="-136" y="170"/>
 		</transition>
-		<transition id="id41">
-			<source ref="id37"/>
-			<target ref="id38"/>
+		<transition id="id40">
+			<source ref="id36"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="510" y="-187">wrong[id]?</label>
 			<label kind="assignment" x="493" y="-170">setSurvFree(id)</label>
 			<nail x="645" y="-191"/>
 			<nail x="331" y="-191"/>
 		</transition>
-		<transition id="id42">
-			<source ref="id38"/>
+		<transition id="id41">
+			<source ref="id37"/>
 			<target ref="id30"/>
 			<label kind="assignment" x="-59" y="-289">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 			<nail x="0" y="-255"/>
 		</transition>
-		<transition id="id43">
+		<transition id="id42">
 			<source ref="id32"/>
-			<target ref="id38"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="102" y="-161">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="255" y="-144">setSurvFree(id)</label>
 			<nail x="238" y="-153"/>
 		</transition>
-		<transition id="id44">
-			<source ref="id35"/>
+		<transition id="id43">
+			<source ref="id34"/>
 			<target ref="id28"/>
 			<label kind="synchronisation" x="-578" y="-153">starting?</label>
 		</transition>
-		<transition id="id45">
-			<source ref="id34"/>
-			<target ref="id31"/>
-			<label kind="guard" x="-110" y="51">x&gt;=Tzr</label>
-			<label kind="assignment" x="-195" y="110">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
-		</transition>
-		<transition id="id46">
+		<transition id="id44">
 			<source ref="id32"/>
-			<target ref="id34"/>
-			<label kind="guard" x="246" y="-8">x&gt;= waitingHelping</label>
-			<label kind="synchronisation" x="246" y="26">assistDone[getIdFromPosCivilian(helping[id])]!</label>
-			<label kind="assignment" x="246" y="9">x=0</label>
+			<target ref="id31"/>
+			<label kind="guard" x="255" y="0">x&gt;= waitingHelping + Tzr</label>
+			<label kind="synchronisation" x="255" y="68">assistDone[getIdFromPosCivilian(helping[id])]!</label>
+			<label kind="assignment" x="255" y="17">x=0,
+grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+			<nail x="238" y="102"/>
 		</transition>
-		<transition id="id47">
+		<transition id="id45">
 			<source ref="id30"/>
 			<target ref="id28"/>
 			<label kind="assignment" x="-391" y="-178">move(id)</label>
 			<nail x="-153" y="-153"/>
 			<nail x="-433" y="-153"/>
 		</transition>
-		<transition id="id48">
+		<transition id="id46">
 			<source ref="id29"/>
 			<target ref="id31"/>
 			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
@@ -999,41 +992,41 @@ void setSurvFree(int id){
 			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
 			<nail x="-902" y="110"/>
 		</transition>
-		<transition id="id49">
+		<transition id="id47">
 			<source ref="id29"/>
 			<target ref="id33"/>
 			<label kind="guard" x="-918" y="-195">x &gt;= Tv</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY, x=0</label>
 		</transition>
-		<transition id="id50">
+		<transition id="id48">
 			<source ref="id30"/>
-			<target ref="id36"/>
+			<target ref="id35"/>
 			<label kind="synchronisation" x="59" y="-493">callFirstResponder[id]?</label>
 			<label kind="assignment" x="76" y="-510">x=0,setWaitingfr()</label>
 			<nail x="-102" y="-467"/>
 		</transition>
-		<transition id="id51">
+		<transition id="id49">
 			<source ref="id30"/>
 			<target ref="id32"/>
 			<label kind="synchronisation" x="17" y="-93">assist[id]?</label>
 			<label kind="assignment" x="-8" y="-110">x=0, setWaiting()</label>
 		</transition>
-		<transition id="id52">
+		<transition id="id50">
 			<source ref="id28"/>
 			<target ref="id31"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<nail x="-433" y="34"/>
 		</transition>
-		<transition id="id53">
+		<transition id="id51">
 			<source ref="id28"/>
 			<target ref="id30"/>
 			<label kind="guard" x="-442" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
 !isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 		</transition>
-		<transition id="id54">
+		<transition id="id52">
 			<source ref="id28"/>
 			<target ref="id29"/>
 			<label kind="guard" x="-841" y="-110">isFireNear(pos[id].x, pos[id].y) &amp;&amp;
@@ -1041,24 +1034,24 @@ void setSurvFree(int id){
 			<label kind="assignment" x="-841" y="-59">grid[pos[id].y][pos[id].x] = NEED</label>
 			<nail x="-595" y="-67"/>
 		</transition>
-		<transition id="id55">
-			<source ref="id37"/>
-			<target ref="id38"/>
+		<transition id="id53">
+			<source ref="id36"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="288" y="-254">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="374" y="-238">setSurvFree(id)</label>
 			<nail x="705" y="-254"/>
 		</transition>
-		<transition id="id56">
-			<source ref="id36"/>
-			<target ref="id38"/>
+		<transition id="id54">
+			<source ref="id35"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="229" y="-398">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="357" y="-416">setSurvFree(id)</label>
 			<nail x="739" y="-373"/>
 			<nail x="365" y="-373"/>
 		</transition>
-		<transition id="id57">
-			<source ref="id36"/>
-			<target ref="id37"/>
+		<transition id="id55">
+			<source ref="id35"/>
+			<target ref="id36"/>
 			<label kind="guard" x="867" y="-340">x &gt;= (waitingFR+x)</label>
 			<label kind="synchronisation" x="867" y="-297">assistDone[idFRtoCall]!</label>
 			<label kind="assignment" x="867" y="-323">setWaiting()</label>
@@ -1314,54 +1307,54 @@ void resetData(){
 
 
 </declaration>
-		<location id="id58" x="-526" y="-8">
+		<location id="id56" x="-526" y="-8">
 			<name x="-560" y="-42">Initializer</name>
 		</location>
-		<location id="id59" x="170" y="-8">
+		<location id="id57" x="170" y="-8">
 			<name x="195" y="-17">Search_closest_responder</name>
 			<committed/>
 		</location>
-		<location id="id60" x="-110" y="-8">
+		<location id="id58" x="-110" y="-8">
 			<name x="-161" y="17">PNA_Detected</name>
 			<committed/>
 		</location>
-		<location id="id61" x="-399" y="-8">
+		<location id="id59" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
-		<init ref="id58"/>
-		<transition id="id62">
-			<source ref="id58"/>
-			<target ref="id61"/>
+		<init ref="id56"/>
+		<transition id="id60">
+			<source ref="id56"/>
+			<target ref="id59"/>
 		</transition>
-		<transition id="id63">
-			<source ref="id60"/>
-			<target ref="id61"/>
+		<transition id="id61">
+			<source ref="id58"/>
+			<target ref="id59"/>
 			<label kind="guard" x="-306" y="-136">!isSurvNearby()</label>
 			<label kind="assignment" x="-289" y="-153">resetData()</label>
 			<nail x="-238" y="-102"/>
 		</transition>
-		<transition id="id64">
-			<source ref="id61"/>
-			<target ref="id61"/>
+		<transition id="id62">
+			<source ref="id59"/>
+			<target ref="id59"/>
 			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
 			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
 			<nail x="-544" y="51"/>
 			<nail x="-484" y="110"/>
 		</transition>
-		<transition id="id65">
-			<source ref="id61"/>
-			<target ref="id60"/>
+		<transition id="id63">
+			<source ref="id59"/>
+			<target ref="id58"/>
 			<label kind="guard" x="-306" y="-34">isPNANearby()</label>
 		</transition>
-		<transition id="id66">
-			<source ref="id60"/>
-			<target ref="id59"/>
+		<transition id="id64">
+			<source ref="id58"/>
+			<target ref="id57"/>
 			<label kind="guard" x="-34" y="-34">isSurvNearby()</label>
 		</transition>
-		<transition id="id67">
-			<source ref="id59"/>
-			<target ref="id61"/>
+		<transition id="id65">
+			<source ref="id57"/>
+			<target ref="id59"/>
 			<label kind="guard" x="-25" y="119">!isFRNearby()</label>
 			<label kind="synchronisation" x="-25" y="102">assist[idSurv]!</label>
 			<label kind="assignment" x="-25" y="136">setSurvBusyHelping(),
@@ -1369,9 +1362,9 @@ resetData()</label>
 			<nail x="170" y="187"/>
 			<nail x="-399" y="187"/>
 		</transition>
-		<transition id="id68">
-			<source ref="id59"/>
-			<target ref="id61"/>
+		<transition id="id66">
+			<source ref="id57"/>
+			<target ref="id59"/>
 			<label kind="guard" x="-68" y="-238">isFRNearby()</label>
 			<label kind="synchronisation" x="-68" y="-255">callFirstResponder[idSurv]!</label>
 			<label kind="assignment" x="-68" y="-221">setSurvBusyCalling(),
@@ -1424,14 +1417,14 @@ system C0, C1, C2, C3, C4, F5, F6,F7, Initializer, D0, D1,D2;
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-13 16:14:38 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-15 22:30:23 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>E[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is potentially always guaranteed to reach a safe state within time Tscs</comment>
-			<result outcome="success" type="quality" timestamp="2024-07-13 16:11:11 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-15 22:30:19 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
@@ -1440,7 +1433,7 @@ system C0, C1, C2, C3, C4, F5, F6,F7, Initializer, D0, D1,D2;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="failure" type="quality" timestamp="2024-07-15 17:41:58 +0200">
+			<result outcome="failure" type="quality" timestamp="2024-07-15 22:30:07 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
