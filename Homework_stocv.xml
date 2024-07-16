@@ -1628,75 +1628,82 @@ Mean estimate of displayed sample: 10.59 ± 1.27 (95% CI)</comment>
 		<query>
 			<formula>E[&lt;=1000;10] (max: n_safe)</formula>
 			<comment>Expected value for n_safe</comment>
-			<result outcome="success" type="quantity" value="0.5 ± 0.377026 (95% CI)" timestamp="2024-07-15 17:48:07 +0200">
+			<result outcome="success" type="quantity" value="0.5 ± 0.505834 (95% CI)" timestamp="2024-07-16 11:01:15 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
-				<details>0.5 ± 0.377026 (95% CI)</details>
+				<details>0.5 ± 0.505834 (95% CI)</details>
 				<plot title="Probability Density Distribution" xaxis="max: n_safe" yaxis="probability density">
-					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,0.5
-1.0,0.5
+					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,0.6
+1.0,0.3
+2.0,0.1
 					</series>
 					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.5,0.0
-0.5,0.5
+0.5,0.6
 					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=2
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
 Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 1]
-Mean estimate of displayed sample: 0.5 ± 0.377 (95% CI)</comment>
+Span of displayed sample: [0, 2]
+Mean estimate of displayed sample: 0.5 ± 0.506 (95% CI)</comment>
 				</plot>
 				<plot title="Probability Distribution" xaxis="max: n_safe" yaxis="probability">
-					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,0.5
-1.0,0.5
+					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,0.6
+1.0,0.3
+2.0,0.1
 					</series>
 					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.5,0.0
-0.5,0.5
+0.5,0.6
 					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=2
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
 Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 1]
-Mean estimate of displayed sample: 0.5 ± 0.377 (95% CI)</comment>
+Span of displayed sample: [0, 2]
+Mean estimate of displayed sample: 0.5 ± 0.506 (95% CI)</comment>
 				</plot>
 				<plot title="Cumulative Probability Distribution" xaxis="max: n_safe" yaxis="probability">
 					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-1.0,0.5
+1.0,0.6
+2.0,0.9
 					</series>
 					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.5,0.0
 0.5,1.0
 					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=2
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
 Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 1]
-Mean estimate of displayed sample: 0.5 ± 0.377 (95% CI)</comment>
+Span of displayed sample: [0, 2]
+Mean estimate of displayed sample: 0.5 ± 0.506 (95% CI)</comment>
 				</plot>
 				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: n_safe" yaxis="probability">
 					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.30849710781876083
-1.0,0.8129139715526015
+1.0,0.8784477418801728
+2.0,0.9974714214555382
 					</series>
 					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-1.0,0.18708602844739852
+1.0,0.26237807660694507
+2.0,0.5549838829718046
 					</series>
 					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-1.0,0.5
+1.0,0.6
+2.0,0.9
 					</series>
 					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.5,0.0
 0.5,1.0
 					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=2
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
 Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 1]
-Mean estimate of displayed sample: 0.5 ± 0.377 (95% CI)</comment>
+Span of displayed sample: [0, 2]
+Mean estimate of displayed sample: 0.5 ± 0.506 (95% CI)</comment>
 				</plot>
 				<plot title="Frequency Histogram" xaxis="max: n_safe" yaxis="count">
-					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,5.0
-1.0,5.0
+					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,6.0
+1.0,3.0
+2.0,1.0
 					</series>
 					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.5,0.0
-0.5,5.0
+0.5,6.0
 					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=2
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
 Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 1]
-Mean estimate of displayed sample: 0.5 ± 0.377 (95% CI)</comment>
+Span of displayed sample: [0, 2]
+Mean estimate of displayed sample: 0.5 ± 0.506 (95% CI)</comment>
 				</plot>
 			</result>
 		</query>
