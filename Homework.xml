@@ -35,7 +35,7 @@ const int Tv = 20; //time for the civilian to die close to a fire
 */
 
 /* scenario 3 */
-const int GRID_W = 5; //grid width
+const int GRID_W = 3; //grid width
 const int GRID_H = 11; //grid height
 const int N_CIVILIANS = 8;  // Total number of civilians
 const int N_DRONES = 1; // Total number of drones
@@ -247,10 +247,9 @@ void initializeGrid() {
     }
 
     // Place exits in predefined positions
-    grid[0][2] = EXIT;
-    grid[3][4] = EXIT;
-    grid[7][4] = EXIT;
-    grid[10][2] = EXIT;
+    grid[0][1] = EXIT;
+    grid[10][1] = EXIT;    
+    grid[5][2] = EXIT;
 
     // Place fire 
     grid[3][0] = FIRE;
@@ -272,8 +271,8 @@ void initializeGrid() {
 
 
     // Place First Responders
-    placeEntity(8, 6, 3, FIRST_RESPONDER);
-    placeEntity(9, 7, 3, FIRST_RESPONDER);
+    placeEntity(8, 6, 2, FIRST_RESPONDER);
+    placeEntity(9, 7, 2, FIRST_RESPONDER);
 
     // Place Drones
     placeEntity(0, 3, 2, DRONE);
@@ -1499,7 +1498,7 @@ system C0, C1, C2, C3, C4, C5, C6, C7, F8, F9, Initializer, D0;
 		<query>
 			<formula>E[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is potentially always guaranteed to reach a safe state within time Tscs</comment>
-			<result outcome="success" type="quality" timestamp="2024-07-16 12:25:14 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-16 14:20:35 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
