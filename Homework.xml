@@ -1313,47 +1313,31 @@ void resetData(){
 			<name x="195" y="-17">Search_closest_responder</name>
 			<committed/>
 		</location>
-		<location id="id48" x="-110" y="-8">
-			<name x="-161" y="17">PNA_Detected</name>
-			<committed/>
-		</location>
-		<location id="id49" x="-399" y="-8">
+		<location id="id48" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
 			<urgent/>
 		</location>
 		<init ref="id46"/>
-		<transition id="id50">
+		<transition id="id49">
 			<source ref="id46"/>
-			<target ref="id49"/>
+			<target ref="id48"/>
 		</transition>
-		<transition id="id51">
+		<transition id="id50">
 			<source ref="id48"/>
-			<target ref="id49"/>
-			<label kind="guard" x="-306" y="-136">!isSurvNearby()</label>
-			<label kind="assignment" x="-289" y="-153">resetData()</label>
-			<nail x="-238" y="-102"/>
-		</transition>
-		<transition id="id52">
-			<source ref="id49"/>
-			<target ref="id49"/>
+			<target ref="id48"/>
 			<label kind="guard" x="-680" y="25">!isPNANearby()</label>
 			<label kind="assignment" x="-705" y="51">dronePatrol(id)</label>
 			<nail x="-544" y="51"/>
 			<nail x="-484" y="110"/>
 		</transition>
-		<transition id="id53">
-			<source ref="id49"/>
-			<target ref="id48"/>
-			<label kind="guard" x="-306" y="-34">isPNANearby()</label>
-		</transition>
-		<transition id="id54">
+		<transition id="id51">
 			<source ref="id48"/>
 			<target ref="id47"/>
-			<label kind="guard" x="-34" y="-34">isSurvNearby()</label>
+			<label kind="guard" x="-255" y="-34">isSurvNearby() &amp;&amp; isPNANearby()</label>
 		</transition>
-		<transition id="id55">
+		<transition id="id52">
 			<source ref="id47"/>
-			<target ref="id49"/>
+			<target ref="id48"/>
 			<label kind="guard" x="-25" y="119">!isFRNearby()</label>
 			<label kind="synchronisation" x="-25" y="102">assist[idSurv]!</label>
 			<label kind="assignment" x="-25" y="136">setSurvBusyHelping(),
@@ -1361,9 +1345,9 @@ resetData()</label>
 			<nail x="170" y="187"/>
 			<nail x="-399" y="187"/>
 		</transition>
-		<transition id="id56">
+		<transition id="id53">
 			<source ref="id47"/>
-			<target ref="id49"/>
+			<target ref="id48"/>
 			<label kind="guard" x="-68" y="-238">isFRNearby()</label>
 			<label kind="synchronisation" x="-68" y="-255">callFirstResponder[idSurv]!</label>
 			<label kind="assignment" x="-68" y="-221">setSurvBusyCalling(),
