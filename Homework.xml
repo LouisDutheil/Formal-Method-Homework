@@ -15,7 +15,7 @@ const int CIVILIAN = 8;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
-/* scenario 1
+/* scenario 1 */
 const int GRID_W = 5; //grid width
 const int GRID_H = 5; //grid height
 const int N_CIVILIANS = 4;  // Total number of civilians
@@ -23,16 +23,15 @@ const int N_DRONES = 2; //Total number of drones
 const int N_FR = 2; // Total number of first responders
 const int Nv = 5;
 const int Tv = 20; //time for the civilian to die close to a fire
-*/
 
-/* scenario 2 */
+/* scenario 2
 const int GRID_W = 6; //grid width
 const int GRID_H = 5; //grid height
 const int N_CIVILIANS = 5;  // Total number of civilians
 const int N_DRONES = 1; //Total number of drones 
 const int N_FR = 3; // Total number of first responders
 const int Tv = 5; //time for the civilian to die close to a fire
-
+*/
 
 /* scenario 3 
 const int GRID_W = 3; //grid width
@@ -51,14 +50,14 @@ const pos_t DEF_POS = {-1, -1};
 
 /********* VERIFICATION PARAMETERS *******************/
 
-/* scenario 1
+/* scenario 1 */
 int Tscs = 10;
-int N_perc = 50;   // meaning 50%
-*/
+int N_perc = 25;   // meaning 50%
 
-/* scenario 2 */
+/* scenario 2
 int Tscs = 20;
 int N_perc = 34;   // meaning %
+*/
 
 /* scenario 3 
 int Tscs = 10;
@@ -137,7 +136,7 @@ void initFRHelping(){
     }
 }
 
-/* scenario 1
+/* scenario 1 */
 void initializeGrid() {
     // Set all cells to EMPTY initially
     int i;
@@ -177,9 +176,9 @@ void initializeGrid() {
     initFRHelping();
     n_safe=0;
 }
-*/
 
-/* scenario 2 */
+
+/* scenario 2
 void initializeGrid() {
     // Set all cells to EMPTY initially
     int i;
@@ -223,6 +222,7 @@ void initializeGrid() {
     initFRHelping();
     n_safe=0;
 }
+*/
 
 /* scenario 3 
 void initializeGrid() {
@@ -1347,22 +1347,22 @@ resetData()</label>
 // List one or more processes to be composed into a system.
 // System Declaration
 
-/* scenario 1 
+/* scenario 1 */
 C0 := Civilian(0, 1);
 C1 := Civilian(1, 3);
 C2 := Civilian(2, 2);
-C3 := Civilian(3, 4);
+C3 := Civilian(3, 2);
 
-F4 := FirstResponder(4, 2);
-F5 := FirstResponder(5, 4);
+F4 := FirstResponder(4, 1);
+F5 := FirstResponder(5, 1);
 
-D0 := Drone(0, 5);
-D1 := Drone(1, 5);
+D0 := Drone(0, 3);
+D1 := Drone(1, 3);
 
 system C0,C1,C2,C3, F4,F5, Initializer,D1,D0;
-*/
 
-/* scenario 2 */
+
+/* scenario 2
 C0 := Civilian(0, 1);
 C1 := Civilian(1, 1);
 C2 := Civilian(2, 2);
@@ -1376,7 +1376,7 @@ F7 := FirstResponder(7, 1);
 D0 := Drone(0, 2);
 
 system C0, C1, C2, C3, C4, F5, F6,F7, Initializer, D0;
-
+*/
 
 /* scenario 3 
 C0 := Civilian(0, 3);
@@ -1418,7 +1418,7 @@ system C0, C1, C2, C3, C4, C5, C6, C7, F8, F9, Initializer, D0;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="success" type="quality" timestamp="2024-07-17 12:14:03 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-17 12:21:15 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
