@@ -940,8 +940,8 @@ void setSurvFree(int id){
 		<transition id="id30">
 			<source ref="id23"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-194" y="17">x&gt;=Tv</label>
-			<label kind="assignment" x="-272" y="-17">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+			<label kind="guard" x="-187" y="17">x==Tv</label>
+			<label kind="assignment" x="-272" y="-17">grid[pos[id].y][pos[id].x] = EMPTY,n_safe+=1</label>
 			<nail x="-102" y="34"/>
 			<nail x="-212" y="68"/>
 		</transition>
@@ -991,14 +991,14 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<source ref="id22"/>
 			<target ref="id24"/>
 			<label kind="synchronisation" x="-799" y="68">assistDone[id]?</label>
-			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, n_safe=n_safe+1</label>
+			<label kind="assignment" x="-860" y="84">grid[pos[id].y][pos[id].x] = EMPTY, n_safe+=1</label>
 			<label kind="comments" x="-766" y="119">when helped and time for helping finishes</label>
 			<nail x="-902" y="110"/>
 		</transition>
 		<transition id="id38">
 			<source ref="id22"/>
 			<target ref="id26"/>
-			<label kind="guard" x="-918" y="-195">x &gt;= Tv</label>
+			<label kind="guard" x="-918" y="-195">x == Tv</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY, x=0</label>
 		</transition>
@@ -1019,21 +1019,19 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<source ref="id21"/>
 			<target ref="id24"/>
 			<label kind="guard" x="-586" y="8">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-586" y="25">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
+			<label kind="assignment" x="-663" y="25">grid[pos[id].y][pos[id].x] = EMPTY,n_safe+=1</label>
 			<nail x="-433" y="34"/>
 		</transition>
 		<transition id="id42">
 			<source ref="id21"/>
 			<target ref="id23"/>
-			<label kind="guard" x="-442" y="-68">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
-!isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-459" y="-93">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
+			<label kind="guard" x="-442" y="-93">!isFireNear(pos[id].x, pos[id].y)</label>
+			<label kind="assignment" x="-459" y="-59">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 		</transition>
 		<transition id="id43">
 			<source ref="id21"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-841" y="-110">isFireNear(pos[id].x, pos[id].y) &amp;&amp;
-!isExitNear(pos[id].x, pos[id].y)</label>
+			<label kind="guard" x="-841" y="-93">isFireNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-841" y="-59">grid[pos[id].y][pos[id].x] = NEED</label>
 			<nail x="-595" y="-67"/>
 		</transition>
