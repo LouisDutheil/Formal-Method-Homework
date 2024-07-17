@@ -31,7 +31,7 @@ const int GRID_H = 5; //grid height
 const int N_CIVILIANS = 5;  // Total number of civilians
 const int N_DRONES = 3; //Total number of drones 
 const int N_FR = 3; // Total number of first responders
-const int Tv = 10; //time for the civilian to die close to a fire
+const int Tv = 5; //time for the civilian to die close to a fire
 
 
 /* scenario 3 
@@ -57,7 +57,7 @@ int N_perc = 50;   // meaning 50%
 */
 
 /* scenario 2 */
-int Tscs = 15;
+int Tscs = 20;
 int N_perc = 33;   // meaning %
 
 /* scenario 3 
@@ -211,7 +211,7 @@ void initializeGrid() {
     //Place Civilians
     placeEntity(0, 3, 4, CIVILIAN);
     placeEntity(1, 3, 5, CIVILIAN);
-    placeEntity(2, 0, 2, CIVILIAN);
+    placeEntity(2, 1, 1, CIVILIAN);
 
     //Place First Responders
     placeEntity(5, 2, 2, FIRST_RESPONDER);
@@ -969,7 +969,7 @@ void setSurvFree(int id){
 		<transition id="id34">
 			<source ref="id27"/>
 			<target ref="id21"/>
-			<label kind="synchronisation" x="-578" y="-153">starting?</label>
+			<label kind="synchronisation" x="-561" y="-144">starting?</label>
 		</transition>
 		<transition id="id35">
 			<source ref="id25"/>
@@ -1376,12 +1376,12 @@ system C0,C1,C2,C3, F4,F5, Initializer,D1,D0;
 
 /* scenario 2 */
 C0 := Civilian(0, 1);
-C1 := Civilian(1, 3);
+C1 := Civilian(1, 1);
 C2 := Civilian(2, 2);
-C3 := Civilian(3, 4);
-C4 := Civilian(4, 3);
+C3 := Civilian(3, 2);
+C4 := Civilian(4, 2);
 
-F5 := FirstResponder(5, 1);
+F5 := FirstResponder(5, 0);
 F6 := FirstResponder(6, 1);
 F7 := FirstResponder(7, 1);
 
