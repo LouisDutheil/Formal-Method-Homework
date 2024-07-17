@@ -645,10 +645,10 @@ void setFRFree(int id){
 		<transition id="id16">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="127" y="110">dead[idRescuing]?</label>
-			<label kind="assignment" x="144" y="127">setFRFree(id)</label>
-			<nail x="289" y="102"/>
-			<nail x="93" y="102"/>
+			<label kind="synchronisation" x="255" y="68">dead[idRescuing]?</label>
+			<label kind="assignment" x="272" y="85">setFRFree(id)</label>
+			<nail x="501" y="110"/>
+			<nail x="170" y="110"/>
 		</transition>
 		<transition id="id17">
 			<source ref="id6"/>
@@ -974,7 +974,7 @@ void setSurvFree(int id){
 		<transition id="id35">
 			<source ref="id25"/>
 			<target ref="id24"/>
-			<label kind="guard" x="255" y="0">x&gt;= waitingHelping + Tzr</label>
+			<label kind="guard" x="255" y="0">x== waitingHelping + Tzr</label>
 			<label kind="synchronisation" x="255" y="68">assistDone[getIdFromPosCivilian(helping[id])]!</label>
 			<label kind="assignment" x="255" y="17">x=0,
 grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
@@ -1049,8 +1049,9 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<source ref="id28"/>
 			<target ref="id24"/>
 			<label kind="guard" x="722" y="-170">x == waitingFR</label>
-			<label kind="synchronisation" x="722" y="-136">assistDone[idFRtoCall]!</label>
-			<label kind="assignment" x="722" y="-153">grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1)</label>
+			<label kind="synchronisation" x="722" y="-119">assistDone[idFRtoCall]!</label>
+			<label kind="assignment" x="722" y="-153">grid[pos[id].y][pos[id].x] = EMPTY,
+n_safe+=1</label>
 			<nail x="858" y="178"/>
 			<nail x="-238" y="178"/>
 		</transition>
