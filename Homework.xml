@@ -58,7 +58,7 @@ int N_perc = 50;   // meaning 50%
 
 /* scenario 2 */
 int Tscs = 20;
-int N_perc = 10;   // meaning %
+int N_perc = 34;   // meaning %
 
 /* scenario 3 
 int Tscs = 10;
@@ -969,10 +969,10 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 		</transition>
 		<transition id="id35">
 			<source ref="id23"/>
-			<target ref="id23"/>
-			<label kind="assignment" x="-255" y="-170">move(id)</label>
-			<nail x="-178" y="-153"/>
-			<nail x="-272" y="-153"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-348" y="-170">move(id)</label>
+			<nail x="-170" y="-136"/>
+			<nail x="-416" y="-136"/>
 		</transition>
 		<transition id="id36">
 			<source ref="id22"/>
@@ -1003,15 +1003,16 @@ grid[pos[id].y][pos[id].x] = EMPTY,n_safe=n_safe+1</label>
 			<label kind="assignment" x="-8" y="-110">x=0, setWaiting()</label>
 		</transition>
 		<transition id="id40">
-			<source ref="id23"/>
+			<source ref="id21"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-467" y="17">isExitNear(pos[id].x, pos[id].y)</label>
-			<label kind="assignment" x="-543" y="34">grid[pos[id].y][pos[id].x] = EMPTY,n_safe+=1</label>
+			<label kind="guard" x="-663" y="0">isExitNear(pos[id].x, pos[id].y)</label>
+			<label kind="assignment" x="-739" y="17">grid[pos[id].y][pos[id].x] = EMPTY,n_safe+=1</label>
 		</transition>
 		<transition id="id41">
 			<source ref="id21"/>
 			<target ref="id23"/>
-			<label kind="guard" x="-442" y="-93">!isFireNear(pos[id].x, pos[id].y)</label>
+			<label kind="guard" x="-442" y="-110">!isFireNear(pos[id].x, pos[id].y) &amp;&amp;
+!isExitNear(pos[id].x, pos[id].y)</label>
 			<label kind="assignment" x="-459" y="-68">grid[pos[id].y][pos[id].x] = SURVIVOR</label>
 		</transition>
 		<transition id="id42">
@@ -1417,7 +1418,7 @@ system C0, C1, C2, C3, C4, C5, C6, C7, F8, F9, Initializer, D0;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="success" type="quality" timestamp="2024-07-17 12:09:32 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-17 12:14:03 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
