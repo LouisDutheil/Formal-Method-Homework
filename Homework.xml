@@ -202,7 +202,8 @@ void initializeGrid() {
     grid[1][4] = FIRE;
     grid[1][5] = FIRE;
     grid[2][2] = FIRE;
-    grid[2][3] = FIRE;    
+    grid[2][3] = FIRE;  
+    grid[2][4] = FIRE;      
     grid[2][5] = FIRE;
 
     //Place Civilians
@@ -687,7 +688,7 @@ int idFRtoCall; //id of the first responder the current civilian is calling
  * @return true if the position is valid, false otherwise.
  */
 bool isValid(int x, int y) {
-    return x &gt;= 0 &amp;&amp; x &lt; GRID_W-1 &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; GRID_H-1;
+    return x &gt;= 0 &amp;&amp; x &lt;= GRID_W-1 &amp;&amp; y &gt;= 0 &amp;&amp; y &lt;= GRID_H-1;
 }
 
 
@@ -1396,10 +1397,6 @@ system C0, C1, C2, C3, C4, C5, C6, C7, F8, F9, Initializer, D0;
 		<query>
 			<formula>E[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is potentially always guaranteed to reach a safe state within time Tscs</comment>
-			<result outcome="success" type="quality" timestamp="2024-07-18 18:45:21 +0200">
-				<option key="--statespace-consumption" value="2"/>
-				<option key="--diagnostic" value="0"/>
-			</result>
 		</query>
 		<query>
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
