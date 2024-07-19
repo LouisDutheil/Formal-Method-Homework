@@ -270,9 +270,7 @@ bool reached_Tscs() {
 }
 
 
-bool isDead(){
- return true;
-}</declaration>
+</declaration>
 	<template>
 		<name>Initializer</name>
 		<location id="id0" x="0" y="0">
@@ -872,10 +870,7 @@ void setSurvFree(int id){
     helping[id] = DEF_POS;
 }
 
-bool iDead(){
-  if(x == Tv) { return true;}
-  else return false;
-}
+
 
 </declaration>
 		<location id="id24" x="-493" y="-68">
@@ -1020,7 +1015,6 @@ bool iDead(){
 		<transition id="id52">
 			<source ref="id25"/>
 			<target ref="id29"/>
-			<label kind="guard" x="-918" y="-195">isDead()</label>
 			<label kind="synchronisation" x="-918" y="-161">dead[id]!</label>
 			<label kind="assignment" x="-918" y="-178">grid[pos[id].y][pos[id].x] = EMPTY</label>
 		</transition>
