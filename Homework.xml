@@ -15,32 +15,33 @@ const int CIVILIAN = 8;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
-/* scenario 1
-const int GRID_W = 5; //grid width
-const int GRID_H = 5; //grid height
+/* scenario 1*/
+const int GRID_W = 3; //grid width
+const int GRID_H = 7; //grid height
 const int N_CIVILIANS = 4;  // Total number of civilians
-const int N_DRONES = 2; //Total number of drones 
-const int N_FR = 2; // Total number of first responders
-const int Nv = 5;
-const int Tv = 10; //time for the civilian to die close to a fire
-*/
+const int N_DRONES = 1; // Total number of drones
+const int N_FR = 1; // Total number of first responders
+const int Tv = 13; //time for the civilian to die close to a 
+
 
 /* scenario 2
 const int GRID_W = 6; //grid width
 const int GRID_H = 5; //grid height
-const int N_CIVILIANS = 5;  // Total number of civilians
+const int N_CIVILIANS = 4;  // Total number of civilians
 const int N_DRONES = 1; //Total number of drones 
 const int N_FR = 3; // Total number of first responders
 const int Tv = 4; //time for the civilian to die close to a fire
 */
 
-/* scenario 3 */
-const int GRID_W = 3; //grid width
-const int GRID_H = 11; //grid height
-const int N_CIVILIANS = 6;  // Total number of civilians
-const int N_DRONES = 1; // Total number of drones
-const int N_FR = 2; // Total number of first responders
-const int Tv = 13; //time for the civilian to die close to a fire
+/* scenario 3 
+const int GRID_W = 8; //grid width
+const int GRID_H = 8; //grid height
+const int N_CIVILIANS = 5;  // Total number of civilians
+const int N_DRONES = 2; //Total number of drones 
+const int N_FR = 1; // Total number of first responders
+const int Nv = 5;
+const int Tv = 10; //time for the civilian to die close to a fire
+*/
 
 typedef int[0,N_CIVILIANS-1] id_zr;
 typedef int[0,N_DRONES-1] id_dr;
@@ -50,19 +51,20 @@ const pos_t DEF_POS = {-1, -1};
 
 /********* VERIFICATION PARAMETERS *******************/
 
-/* scenario 1
+/* scenario 1*/
 int Tscs = 10;
-int N_perc = 50;   // meaning 50%
-*/
+int N_perc = 30;   // meaning 30%
+
 
 /* scenario 2
 int Tscs = 5;
-int N_perc = 0;   // meaning %
+int N_perc = 40;   // meaning %
 */
 
-/* scenario 3 */
-int Tscs = 10;
-int N_perc = 100;   // meaning %
+/* scenario 3 
+int Tscs = 5;
+int N_perc = 20;
+*/
 
 /********* VERIFICATION VARIABLES *******************/
 
@@ -135,47 +137,45 @@ void initFRHelping(){
     }
 }
 
-/* scenario 1
+/* scenario 1*/
 void initializeGrid() {
     // Set all cells to EMPTY initially
-    int i;
-    for (i = 0; i &lt; GRID_W; i++) {
-        int j;
-        for (j = 0; j &lt; GRID_H; j++) {
-            grid[j][i] = EMPTY;
+    int i, j;
+    for (i = 0; i &lt; GRID_H; i++) {
+        for (j = 0; j &lt; GRID_W; j++) {
+            grid[i][j] = EMPTY;
         }
     }
 
-
     // Place exits in predefined positions
-    grid[4][0] = EXIT;
-    grid[4][4] = EXIT;
+    grid[0][1] = EXIT;   
+    grid[5][2] = EXIT;
 
-    //Place fire 
-    grid[0][4] = FIRE;
-    grid[1][0] = FIRE;
-    grid[1][3] = FIRE;
-    grid[1][4] = FIRE;    
+    // Place fire 
+    grid[3][0] = FIRE;
+    grid[3][1] = FIRE;
+    grid[4][0] = FIRE;    
+    grid[4][1] = FIRE;
+    
 
-    //Place Civilians
-    placeEntity(0, 0, 1, CIVILIAN);
-    placeEntity(1, 0, 3, CIVILIAN);
-    placeEntity(2, 2, 0, CIVILIAN);
-    placeEntity(3, 3, 4, CIVILIAN);
+    // Place Civilians
+    placeEntity(0, 2, 1, CIVILIAN);
+    placeEntity(1, 2, 2, CIVILIAN);
+    placeEntity(2, 5, 0, CIVILIAN);
+    placeEntity(3, 5, 1, CIVILIAN);
+ 
 
-    //Place First Responders
-    placeEntity(4, 4, 2, FIRST_RESPONDER);
-    placeEntity(5, 2, 4, FIRST_RESPONDER);
+    // Place First Responders
+    placeEntity(4, 6, 2, FIRST_RESPONDER);
 
-    //Place Drones
-    placeEntity(0, 0, 0, DRONE);
-    placeEntity(1, 4, 3, DRONE);
+    // Place Drones
+    placeEntity(0, 3, 2, DRONE);
 
     initCallingHelping();
     initFRHelping();
-    n_safe=0;
+    n_safe = 0;
 }
-*/
+
 
 /* scenario 2
 void initializeGrid() {
@@ -209,11 +209,12 @@ void initializeGrid() {
     placeEntity(0, 3, 4, CIVILIAN);
     placeEntity(1, 3, 5, CIVILIAN);
     placeEntity(2, 1, 1, CIVILIAN);
+    placeEntity(3, 0, 0, CIVILIAN);
 
     //Place First Responders
-    placeEntity(5, 2, 2, FIRST_RESPONDER);
-    placeEntity(6, 4, 0, FIRST_RESPONDER);
-    placeEntity(7, 4, 5, FIRST_RESPONDER);
+    placeEntity(4, 2, 2, FIRST_RESPONDER);
+    placeEntity(5, 4, 0, FIRST_RESPONDER);
+    placeEntity(6, 4, 5, FIRST_RESPONDER);
 
     //Place Drones
     placeEntity(0, 4, 1, DRONE);
@@ -221,52 +222,58 @@ void initializeGrid() {
     initCallingHelping();
     initFRHelping();
     n_safe=0;
-}
-*/
+}*/
 
-/* scenario 3 */
+
+/* scenario 3 
 void initializeGrid() {
-    // Set all cells to EMPTY initially
-    int i, j;
-    for (i = 0; i &lt; GRID_H; i++) {
-        for (j = 0; j &lt; GRID_W; j++) {
-            grid[i][j] = EMPTY;
+     // Set all cells to EMPTY initially
+    int i;
+    for (i = 0; i &lt; GRID_W; i++) {
+        int j;
+        for (j = 0; j &lt; GRID_H; j++) {
+            grid[j][i] = EMPTY;
         }
     }
 
+
     // Place exits in predefined positions
-    grid[0][1] = EXIT;
-    grid[10][1] = EXIT;    
-    grid[5][2] = EXIT;
+    grid[4][0] = EXIT;
+    grid[5][0] = EXIT;
+    grid[4][7] = EXIT;
+    grid[5][7] = EXIT;
 
-    // Place fire 
-    grid[3][0] = FIRE;
-    grid[3][1] = FIRE;
-    grid[4][0] = FIRE;    
-    grid[4][1] = FIRE;
-    grid[8][1] = FIRE;
+    //Place fire 
+    grid[1][2] = FIRE;
+    grid[1][3] = FIRE;
+    grid[2][2] = FIRE;
+    grid[2][3] = FIRE;
+    grid[3][2] = FIRE;
+    grid[3][3] = FIRE;
+    grid[3][4] = FIRE;
+    grid[4][3] = FIRE;  
+    grid[4][4] = FIRE;    
+    
+   
 
-    // Place Civilians
-    placeEntity(0, 2, 1, CIVILIAN);
-    placeEntity(1, 2, 2, CIVILIAN);
-    placeEntity(2, 4, 2, CIVILIAN);
-    placeEntity(3, 7, 1, CIVILIAN);
-    placeEntity(4, 8, 0, CIVILIAN);
-    placeEntity(5, 10, 0, CIVILIAN);
+    //Place Civilians
+    placeEntity(0, 0, 1, CIVILIAN);
+    placeEntity(1, 1, 4, CIVILIAN);
+    placeEntity(2, 4, 5, CIVILIAN);
+    placeEntity(3, 5, 2, CIVILIAN);
+    placeEntity(4, 0, 7, CIVILIAN);
 
+    //Place First Responders
+    placeEntity(5, 5, 7, FIRST_RESPONDER);
 
-
-    // Place First Responders
-    placeEntity(6, 6, 2, FIRST_RESPONDER);
-    placeEntity(7, 1, 2, FIRST_RESPONDER);
-
-    // Place Drones
-    placeEntity(0, 3, 2, DRONE);
+    //Place Drones
+    placeEntity(0, 0, 0, DRONE);
+    placeEntity(1, 4, 3, DRONE);
 
     initCallingHelping();
     initFRHelping();
-    n_safe = 0;
-}
+    n_safe=0;
+}*/
 
 int abs_(int x) {
     if (x &lt; 0) {
@@ -327,12 +334,12 @@ int getIdFromPosFirstResponder(pos_t posFR) {
 	</template>
 	<template>
 		<name>FirstResponder</name>
-		<parameter>const id_fr id, int Tfr</parameter>
+		<parameter>const id_fr id, int Tfr, int idRescuing</parameter>
 		<declaration>clock x;
 
-int id_chan;
+int id_chan = id - N_CIVILIANS;
 
-int idRescuing; // id person we're rescuing
+
 int waiting; // distance from person in need when zr called
 int zrToCommTo; // id zr to contact when finishing Tfr
 
@@ -344,7 +351,7 @@ int zrToCommTo; // id zr to contact when finishing Tfr
  * @return true if the position is valid, false otherwise.
  */
 bool isValid(int x, int y) {
-    if(x &gt;= 0 &amp;&amp; x &lt; GRID_W-1 &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; GRID_H-1){
+    if(x &gt;= 0 &amp;&amp; x &lt;= GRID_W-1 &amp;&amp; y &gt;= 0 &amp;&amp; y &lt;= GRID_H-1){
         return true;
     }
     return false;
@@ -397,17 +404,16 @@ bool isNeedNear(pos_t posNeed) {
 }
 
 void saveIdRescuing(pos_t posResc){
-    const int DX[4] = {-1, 1, 0, 0}; // Up, Down
-    const int DY[4] = {0, 0, -1, 1}; // Left, Right
+    const int DX[8] = {-1, 1, 0, 0, -1, -1, 1, 1}; // Up, Down, Left, Right, Diagonals
+    const int DY[8] = {0, 0, -1, 1, -1, 1, -1, 1}; // Up, Down, Left, Right, Diagonals
     int i;
-
-    for (i = 0; i &lt; 4; i++) {
+    for (i = 0; i &lt; 8; i++) {
         int nx = posResc.x + DX[i];
         int ny = posResc.y + DY[i];
         pos_t newPos = {nx, ny};
         if (isValid(nx, ny) &amp;&amp; grid[ny][nx] == NEED) {
-            FRHelping[id-N_CIVILIANS].x= nx;
-            FRHelping[id-N_CIVILIANS].y= ny;
+            FRHelping[id_chan].x= nx;
+            FRHelping[id_chan].y= ny;
             idRescuing = getIdFromPosCivilian(newPos);
         }
     }
@@ -551,9 +557,10 @@ void setWaiting(pos_t posFR){
             pos_rescue = helping[i];
             FRHelping[id-N_CIVILIANS].x= pos_rescue.x;
             FRHelping[id-N_CIVILIANS].y= pos_rescue.y;
-            zrToCommTo = i;     
+            zrToCommTo = i;  
+            idRescuing = getIdFromPosCivilian(pos_rescue);   
      }
-    } 
+    }
    waiting = abs(calculateDistance(id,pos_rescue));
 }
 
@@ -570,7 +577,7 @@ void setFRFree(int id){
 		</location>
 		<location id="id5" x="654" y="0">
 			<name x="644" y="-34">Called</name>
-			<label kind="invariant" x="569" y="17">x&lt;=waiting + Tfr</label>
+			<label kind="invariant" x="569" y="17">x&lt;=(waiting + Tfr)</label>
 		</location>
 		<location id="id6" x="229" y="-93">
 			<name x="219" y="-127">Initializer</name>
@@ -583,10 +590,16 @@ void setFRFree(int id){
 		<init ref="id6"/>
 		<transition id="id9">
 			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="229" y="-25">assistDone[id]?</label>
+			<label kind="assignment" x="212" y="0">x=0,setWaiting(pos[id])</label>
+		</transition>
+		<transition id="id10">
+			<source ref="id3"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-85" y="102">x == Tv</label>
 		</transition>
-		<transition id="id10">
+		<transition id="id11">
 			<source ref="id7"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-289" y="-246">x==Tfr &amp;&amp; !differentPerson()</label>
@@ -594,16 +607,16 @@ void setFRFree(int id){
 			<label kind="assignment" x="-246" y="-212">setFRFree(id)</label>
 			<nail x="-110" y="-170"/>
 		</transition>
-		<transition id="id11">
+		<transition id="id12">
 			<source ref="id5"/>
 			<target ref="id3"/>
-			<label kind="guard" x="204" y="187">x&gt;=waiting+Tfr</label>
+			<label kind="guard" x="204" y="187">x ==(waiting+Tfr)</label>
 			<label kind="synchronisation" x="204" y="170">assistDone[idRescuing]!</label>
 			<label kind="assignment" x="204" y="204">setFRFree(id)</label>
 			<nail x="654" y="161"/>
 			<nail x="8" y="161"/>
 		</transition>
-		<transition id="id12">
+		<transition id="id13">
 			<source ref="id7"/>
 			<target ref="id5"/>
 			<label kind="guard" x="204" y="-331">x==Tfr &amp;&amp; differentPerson()</label>
@@ -611,7 +624,7 @@ void setFRFree(int id){
 			<label kind="assignment" x="204" y="-289">x=0</label>
 			<nail x="654" y="-289"/>
 		</transition>
-		<transition id="id13">
+		<transition id="id14">
 			<source ref="id4"/>
 			<target ref="id7"/>
 			<label kind="guard" x="-646" y="-25">x&lt;Tfr</label>
@@ -620,7 +633,7 @@ void setFRFree(int id){
 			<nail x="-663" y="0"/>
 			<nail x="-663" y="-289"/>
 		</transition>
-		<transition id="id14">
+		<transition id="id15">
 			<source ref="id4"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-373" y="-153">x&lt;Tfr</label>
@@ -629,7 +642,7 @@ void setFRFree(int id){
 			<nail x="-391" y="-119"/>
 			<nail x="-119" y="-119"/>
 		</transition>
-		<transition id="id15">
+		<transition id="id16">
 			<source ref="id4"/>
 			<target ref="id3"/>
 			<label kind="guard" x="-229" y="51">x&gt;=Tfr</label>
@@ -638,7 +651,7 @@ void setFRFree(int id){
 			<nail x="-323" y="76"/>
 			<nail x="-51" y="76"/>
 		</transition>
-		<transition id="id16">
+		<transition id="id17">
 			<source ref="id5"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="255" y="68">dead[idRescuing]?</label>
@@ -646,16 +659,10 @@ void setFRFree(int id){
 			<nail x="501" y="110"/>
 			<nail x="170" y="110"/>
 		</transition>
-		<transition id="id17">
+		<transition id="id18">
 			<source ref="id6"/>
 			<target ref="id3"/>
 			<label kind="synchronisation" x="110" y="-68">starting?</label>
-		</transition>
-		<transition id="id18">
-			<source ref="id3"/>
-			<target ref="id5"/>
-			<label kind="synchronisation" x="178" y="0">assistDone[id]?</label>
-			<label kind="assignment" x="161" y="17">x=0,setWaiting(pos[id])</label>
 		</transition>
 		<transition id="id19">
 			<source ref="id3"/>
@@ -1022,7 +1029,7 @@ void setSurvFree(int id){
 		<transition id="id43">
 			<source ref="id28"/>
 			<target ref="id29"/>
-			<label kind="synchronisation" x="229" y="-398">dead[getIdFromPosCivilian(helping[id])]?</label>
+			<label kind="synchronisation" x="340" y="-399">dead[getIdFromPosCivilian(helping[id])]?</label>
 			<label kind="assignment" x="357" y="-416">setSurvFree(id)</label>
 			<nail x="739" y="-373"/>
 			<nail x="365" y="-373"/>
@@ -1294,7 +1301,7 @@ void resetData(){
 		</location>
 		<location id="id46" x="-399" y="-8">
 			<name x="-425" y="-42">Initial</name>
-			<label kind="invariant" x="-409" y="9">x &lt;= 1</label>
+			<label kind="invariant" x="-409" y="9">x&lt;=1</label>
 		</location>
 		<init ref="id45"/>
 		<transition id="id47">
@@ -1305,19 +1312,17 @@ void resetData(){
 		<transition id="id48">
 			<source ref="id46"/>
 			<target ref="id46"/>
-			<label kind="guard" x="-654" y="59">x &gt;= 1</label>
-			<label kind="assignment" x="-705" y="85">dronePatrol(id), x=0</label>
+			<label kind="assignment" x="-629" y="76">dronePatrol(id),x=0</label>
 			<nail x="-544" y="51"/>
 			<nail x="-484" y="110"/>
 		</transition>
 		<transition id="id49">
 			<source ref="id46"/>
 			<target ref="id46"/>
-			<label kind="guard" x="-110" y="25">x&gt;=1 &amp;&amp; isSurvNearby() &amp;&amp; isPNANearby() &amp;&amp; !isFRNearby()</label>
+			<label kind="guard" x="-110" y="25">x==1 &amp;&amp; isSurvNearby() &amp;&amp; isPNANearby() &amp;&amp; !isFRNearby()</label>
 			<label kind="synchronisation" x="-110" y="8">assist[idSurv]!</label>
 			<label kind="assignment" x="-110" y="42">setSurvBusyHelping(),
-resetData(),
-x=0</label>
+resetData(),x=0</label>
 			<nail x="-119" y="-8"/>
 			<nail x="-119" y="51"/>
 			<nail x="-399" y="51"/>
@@ -1325,12 +1330,11 @@ x=0</label>
 		<transition id="id50">
 			<source ref="id46"/>
 			<target ref="id46"/>
-			<label kind="guard" x="-110" y="-119">x&gt;=1 &amp;&amp; isSurvNearby() &amp;&amp; isPNANearby() &amp;&amp; isFRNearby()</label>
+			<label kind="guard" x="-110" y="-119">x==1 &amp;&amp; isSurvNearby() &amp;&amp; isPNANearby() &amp;&amp; isFRNearby()</label>
 			<label kind="synchronisation" x="-110" y="-136">callFirstResponder[idSurv]!</label>
 			<label kind="assignment" x="-110" y="-102">setSurvBusyCalling(),
 setFRBusyHelping(),
-resetData(),
-x=0</label>
+resetData(),x=0</label>
 			<nail x="-119" y="-8"/>
 			<nail x="-119" y="-68"/>
 			<nail x="-399" y="-68"/>
@@ -1340,53 +1344,51 @@ x=0</label>
 // List one or more processes to be composed into a system.
 // System Declaration
 
-/* scenario 1
+/* scenario 1*/
 C0 := Civilian(0, 1);
-C1 := Civilian(1, 3);
-C2 := Civilian(2, 2);
+C1 := Civilian(1, 4);
+C2 := Civilian(2, 1);
 C3 := Civilian(3, 2);
 
-F4 := FirstResponder(4, 1);
-F5 := FirstResponder(5, 1);
+F4 := FirstResponder(4, 3,0);
 
-D0 := Drone(0, 3);
-D1 := Drone(1, 3);
+D0 := Drone(0, 2);
 
-system C0,C1,C2,C3, F4,F5, Initializer,D1,D0;
-*/
+system C0, C1, C2, C3, F4, Initializer, D0;
+
 
 /* scenario 2
 C0 := Civilian(0, 1);
 C1 := Civilian(1, 1);
 C2 := Civilian(2, 2);
 C3 := Civilian(3, 2);
-C4 := Civilian(4, 2);
 
-F5 := FirstResponder(5, 0);
-F6 := FirstResponder(6, 1);
-F7 := FirstResponder(7, 1);
+
+F4 := FirstResponder(4, 0,0);
+F5 := FirstResponder(5, 2,0);
+F6 := FirstResponder(6, 1,0);
 
 D0 := Drone(0, 2);
 
-system C0, C1, C2, C3, C4, F5, F6,F7, Initializer, D0;
+system C0, C1, C2, C3, F4, F5,F6, Initializer, D0;
 */
 
-/* scenario 3 */
+/* scenario 3 
 C0 := Civilian(0, 1);
-C1 := Civilian(1, 4);
-C2 := Civilian(2, 1);
-C3 := Civilian(3, 2);
-C4 := Civilian(4, 1);
-C5 := Civilian(5, 1);
+C1 := Civilian(1, 3);
+C2 := Civilian(2, 2);
+C3 := Civilian(3, 6);
+C4 := Civilian(4, 2);
 
 
-F8 := FirstResponder(6, 1);
-F9 := FirstResponder(7, 1);
+F5 := FirstResponder(5, 3,0);
 
-D0 := Drone(0, 7);
 
-system C0, C1, C2, C3, C4, C5, F8, F9, Initializer, D0;
-</system>
+D0 := Drone(0, 1);
+D1 := Drone(1, 1);
+
+system C0,C1,C2,C3, C4,F5 ,Initializer,D1,D0;
+*/</system>
 	<queries>
 		<option key="--statespace-consumption" value="2"/>
 		<option key="--diagnostic" value="0"/>
@@ -1394,7 +1396,7 @@ system C0, C1, C2, C3, C4, C5, F8, F9, Initializer, D0;
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-19 17:33:36 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-20 12:00:52 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -1410,7 +1412,7 @@ system C0, C1, C2, C3, C4, C5, F8, F9, Initializer, D0;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="failure" type="quality" timestamp="2024-07-19 17:41:35 +0200">
+			<result outcome="failure" type="quality" timestamp="2024-07-20 12:00:56 +0200">
 				<option key="--diagnostic" value="0"/>
 			</result>
 		</query>
