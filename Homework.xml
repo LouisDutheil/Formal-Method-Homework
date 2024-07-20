@@ -11,7 +11,6 @@ const int FIRST_RESPONDER = 4;
 const int SURVIVOR = 5;
 const int NEED = 7;
 const int CIVILIAN = 8;
-// const int N = 5;
 
 /*********GLOBAL SYSTEM PARAMETERS *****************/
 
@@ -39,7 +38,6 @@ const int GRID_H = 8; //grid height
 const int N_CIVILIANS = 5;  // Total number of civilians
 const int N_DRONES = 2; //Total number of drones 
 const int N_FR = 1; // Total number of first responders
-const int Nv = 5;
 const int Tv = 10; //time for the civilian to die close to a fire
 */
 
@@ -77,9 +75,6 @@ int grid[GRID_H][GRID_W];    // map considering role
 // arrays used to put in relations ids with positions of entities (useful for drones too when contacting zero responders)
 pos_t pos[N_CIVILIANS+N_FR];        // Array of coordinates of all civ+fr
 pos_t posDrone[N_DRONES];
-
-//todo remove int xNeed[GRID_H][GRID_W];   // X coordinate for need requests, xNeed[1][2] set to 5 indicates that the civilian found at coordinates (y=1,x=2) is in charge of saving the person in need found at x = 5  
-//todo remove int yNeed[GRID_H][GRID_W];   // Y coordinate for need requests, --same-- at y = value
 
 pos_t helping[N_CIVILIANS]; // helping {{1, 5}, {-1, -1}} means that civilian with id 0 is helping person found at coordinate x = 1 and y = 5 while civilian with id 1 is free
 pos_t calling[N_CIVILIANS]; // calling {{1, 5}, {-1, -1}} means that civilian with id 0 is calling first responder found at coordinate x = 1 and y = 5 while civilian with id 1 is free
@@ -1396,14 +1391,14 @@ system C0,C1,C2,C3, C4,F5 ,Initializer,D1,D0;
 			<formula>E&lt;&gt; (global_time &lt;= Tscs and n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>It is possible for a percentage N% of all civilians to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-07-20 12:00:52 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-20 12:13:03 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>E[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is potentially always guaranteed to reach a safe state within time Tscs</comment>
-			<result outcome="success" type="quality" timestamp="2024-07-19 17:38:18 +0200">
+			<result outcome="success" type="quality" timestamp="2024-07-20 14:06:01 +0200">
 				<option key="--statespace-consumption" value="2"/>
 				<option key="--diagnostic" value="0"/>
 			</result>
@@ -1412,9 +1407,6 @@ system C0,C1,C2,C3, C4,F5 ,Initializer,D1,D0;
 			<formula>A[] (global_time &gt;= Tscs imply n_safe &gt;= (N_CIVILIANS * N_perc / 100))</formula>
 			<comment>a percentage N% of all civilians is always guaranteed to reach a safe state within time Tscs</comment>
 			<option key="--diagnostic" value="0"/>
-			<result outcome="failure" type="quality" timestamp="2024-07-20 12:00:56 +0200">
-				<option key="--diagnostic" value="0"/>
-			</result>
 		</query>
 	</queries>
 </nta>
