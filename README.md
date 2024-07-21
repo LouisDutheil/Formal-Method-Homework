@@ -127,4 +127,4 @@ The model provides a valuable tool for evaluating and optimizing search-and-resc
 
 ---
 
-For detailed analysis and results, refer to the full report included in this repository.
+For detailed analysis and results, refer to the full report found at .
